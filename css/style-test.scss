@@ -69,6 +69,23 @@ header {
         border-radius: 10px;
         z-index: 100;
         border: 3px solid #000;
+
+        .date-header {
+            width: 100%;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .boxscore-grid {
+            display: grid;
+            grid-template-columns: 7fr repeat(13, 1fr);
+            grid-template-rows: 1fr 1fr 1fr 1fr;
+
+            .grid-item {
+                padding: 2px;
+                border: 1px solid #000;
+            }
+        }
     }
 
     .game-container {

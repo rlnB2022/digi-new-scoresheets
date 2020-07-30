@@ -88,6 +88,26 @@ header .hamburger-menu .hamburger-line {
   border: 3px solid #000;
 }
 
+.grid-of-games .boxscore .date-header {
+  width: 100%;
+  text-align: center;
+  font-size: 14px;
+}
+
+.grid-of-games .boxscore .boxscore-grid {
+  display: -ms-grid;
+  display: grid;
+  -ms-grid-columns: 7fr (1fr)[13];
+      grid-template-columns: 7fr repeat(13, 1fr);
+  -ms-grid-rows: 1fr 1fr 1fr 1fr;
+      grid-template-rows: 1fr 1fr 1fr 1fr;
+}
+
+.grid-of-games .boxscore .boxscore-grid .grid-item {
+  padding: 2px;
+  border: 1px solid #000;
+}
+
 .grid-of-games .game-container {
   width: 90%;
   margin: 0 auto 20px auto;
