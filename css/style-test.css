@@ -108,6 +108,13 @@ header .hamburger-menu .hamburger-line {
   border: 1px solid #000;
 }
 
+.grid-of-games .boxscore .boxscore-stats {
+  display: -ms-grid;
+  display: grid;
+  -ms-grid-columns: 3fr (1fr)[7];
+      grid-template-columns: 3fr repeat(7, 1fr);
+}
+
 .grid-of-games .game-container {
   width: 90%;
   margin: 0 auto 20px auto;
