@@ -88,8 +88,34 @@ header {
         }
 
         .boxscore-stats {
+            width: 100%;
             display: grid;
-            grid-template-columns: 3fr repeat(7, 1fr);
+            grid-template-columns: 4fr repeat(7, 1fr);
+            grid-template-rows: auto;
+            border-top: 1px solid #000;
+            border-bottom: 1px solid #000;
+            font-size: 12px;
+
+            .boxscore-bottom-border {
+                border-bottom: 1px solid #000;
+            }
+
+            .boxscore-center {
+                text-align: center;
+            }
+
+            .boxscore-cell {
+                border-left: 1px solid #000;
+                padding: 2px 0;
+            }
+
+            .boxscore-name {
+                padding-left: 5px;
+            }
+
+            .boxscore-cell-end {
+                border-right: 1px solid #000;
+            }
         }
     }
 
