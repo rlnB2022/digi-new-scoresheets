@@ -79,7 +79,6 @@ header .hamburger-menu .hamburger-line {
   position: absolute;
   left: 5vw;
   top: 15vh;
-  bottom: 5vh;
   display: none;
   width: 90vw;
   margin: 0 auto;
@@ -140,6 +139,10 @@ header .hamburger-menu .hamburger-line {
 
 .grid-of-games .boxscore .boxscore-stats .boxscore-cell-end {
   border-right: 1px solid #000;
+}
+
+.grid-of-games .boxscore .boxscore-stats .boxscore-sub {
+  padding-left: 15px;
 }
 
 .grid-of-games .game-container {
