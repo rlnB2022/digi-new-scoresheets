@@ -1,5 +1,120 @@
 <?php
 
+function getLineScores($linky, $gamedate, $hometeam, $gamenum, $month, $day, $year) {
+    $sql = "SELECT * FROM GAMELOGS WHERE DATE = '" . $gamedate  . "' AND HOMETEAM = '" . $hometeam . "' AND GAMENUM = '" . $gamenum . "' LIMIT 1";
+
+    $result = mysqli_query($linky, $sql);
+
+    $resultCheck = mysqli_num_rows($result);
+
+    if($resultCheck > 0) {
+        $row = mysqli_fetch_assoc($result);
+        
+        $boxscorerows = ceil($row['outs'] / 6);
+
+        $vislinescore = getLineScore($row['vislinescore']);
+        $homelinescore = getLineScore($row['homelinescore']);
+
+        ?>
+        <h1 class="date-header">
+            <?php echo getDayOfWeek($row['dayofweek']) . ", " . $month . " " . $day . ", " . $year; ?>
+        </h1>
+        <div class="boxscore-grid">
+            <div></div>
+            <?php
+                for($i = 0; $i < 9; $i++) { ?>
+                    <div class="grid-item"><?php echo $i+1; ?></div>
+                <?php
+                } ?>
+
+            <div class="grid-item"></div>
+            <div class="grid-item">R</div>
+            <div class="grid-item">H</div>
+            <div class="grid-item">E</div>
+            <div><?php echo getTeamName($row['visteam']); ?></div>
+            <?php
+                for($i = 0; $i < $boxscorerows; $i++) { ?>
+                    <div class="grid-item"><?php echo $vislinescore[$i]; ?></div>
+                <?php
+                }
+            ?>
+            <div class="grid-item"></div>
+            <div class="grid-item"><?php echo $row['visscore']; ?></div>
+            <div class="grid-item"><?php echo $row['vish']; ?></div>
+            <div class="grid-item"><?php echo $row['viserrors']; ?></div>
+            <div><?php echo getTeamName($row['hometeam']); ?></div>
+            <?php
+                for($i = 0; $i < $boxscorerows; $i++) { ?>
+                    <div class="grid-item"><?php echo $homelinescore[$i]; ?></div>
+                <?php
+                }
+            ?>
+            <div class="grid-item"></div>
+            <div class="grid-item"><?php echo $row['homescore']; ?></div>
+            <div class="grid-item"><?php echo $row['homeh']; ?></div>
+            <div class="grid-item"><?php echo $row['homeerrors']; ?></div>
+        </div>
+    <?php
+    }
+    else {
+        echo "NOTHING FOUND";
+    }
+}
+
+function getVisitorLineup($linky, $gameid, &$gameState, &$visBoxScoreStats, &$homeBoxScoreStats) {
+
+    $sql = "SELECT * FROM VISLINEUPS WHERE GAMEID = '" . $gameid . "'";
+
+    $result = mysqli_query($linky, $sql);
+
+    $resultCheck = mysqli_num_rows($result);
+
+    if($resultCheck > 0) {
+        $row = mysqli_fetch_assoc($result);
+
+        for($i = 0; $i < 9; $i++) {
+            // add playerid to visBoxScoreStats
+            $batterS = new playerStat();
+            $batterS->playerid = $row['batter' . ($i + 1)];
+            $batterS->playerpos = $row['pos' . ($i + 1)];
+            $batterS->status = 'starter';
+
+            $tempPos = 'pos_' . $batterS->playerpos;
+
+            // assign position to visDefense
+            $gameState->visDefense->$tempPos = $batterS->playerid;
+
+            array_push($visBoxScoreStats, $batterS);
+        }
+    }
+}
+
+function getStartingPitchers($linky, $gamedate, $hometeam, $gamenum, &$visPitcherBoxScoreStats, &$homePitcherBoxScoreStats) {
+
+    // this function is redundant - should grab data from getlinescore function
+    // no sense in another database query
+    $sql = "SELECT * FROM GAMELOGS WHERE DATE = '" . $gamedate  . "' AND HOMETEAM = '" . $hometeam . "' AND GAMENUM = '" . $gamenum . "' LIMIT 1";
+
+    $result = mysqli_query($linky, $sql);
+
+    $resultCheck = mysqli_num_rows($result);
+
+    if($resultCheck > 0) {
+        $row = mysqli_fetch_assoc($result);
+        $batterS = new playerStat();
+        $batterS->playerid = $row['visstarterid'];
+        $batterS->playerpos = 'P';
+        $batterS->status = 'starter';
+        array_push($visPitcherBoxScoreStats, $batterS);
+
+        $batterS = new playerStat();
+        $batterS->playerid = $row['homestarterid'];
+        $batterS->playerpos = 'P';
+        $batterS->status = 'starter';
+        array_push($homePitcherBoxScoreStats, $batterS);
+    }
+}
+
 class playerStat {
     public $status = ''; // starter or sub
     public $playerid = '';
@@ -22,6 +137,7 @@ class playerStat {
     public $batter_stat_hbp = 0;
     public $batter_stat_sh = 0;
     public $batter_stat_sf = 0;
+    public $fielder_stat_error = 0;
     public $pitcher_stat_wp = 0;
     public $pitcher_stat_er = 0;
     public $pitcher_stat_r = 0;
@@ -36,7 +152,7 @@ class playerStat {
     // NEED TO FINISH THIS UP **********************************************************    
 
     public function getHits() {
-        return $this->stat_1b + $this->stat_2b + $this->stat_3b + $this->stat_hr;
+        return $this->batter_stat_1b + $this->batter_stat_2b + $this->batter_stat_3b + $this->batter_stat_hr;
     }
 }
 
@@ -204,49 +320,49 @@ function getPlayerName($linky, $playerid) {
         $fullname = $row['firstname'] . " " . $row['lastname'];
     }
     else {
-        echo "NOPE";
+        echo "NOT FOUND";
     }
 
     return $fullname;
 }
 
-function getStrikeouts($row) {
-    global $visBoxScoreStats;
-    global $homeBoxScoreStats;
-    global $outs_in_the_inning;
+function getStrikeouts($row, &$gameState, &$visBoxScoreStats, &$homeBoxScoreStats) {
 
     $teamatbat = $row['TEAMATBAT'] === '0' ? $visBoxScoreStats : $homeBoxScoreStats;
 
     foreach($teamatbat as $vs) {
         if($vs->playerid === $row['PLAYERID']) {
-            $vs->stat_k++;
-            $vs->stat_ab++;
+            $vs->batter_stat_k++;
+            $vs->batter_stat_ab++;
         }
     }
 
-    $outs_in_the_inning++;
+    // runners in scoring position (RISP)
+    if($gameState->runneron2nd !=='None' || $gameState->runneron3rd !=='None') {
+        if($row['TEAMATBAT'] === '0') {
+            $gameState->risp_vis_ab++;
+        }
+        else {
+            $gameState->risp_home_ab++;
+        }
+    }
 
-    moveBaseRunners($row, 'k');
+    $gameState->outs_in_the_inning++;
+
+    moveBaseRunners($row, 'k', $gameState, $visBoxScoreStats, $homeBoxScoreStats);
 }
 
-function getWalks($row, $walktype) {
-    global $visBoxScoreStats;
-    global $homeBoxScoreStats;
-    global $runnersOnBase;
+function getWalks($row, $walktype, &$gameState, &$visBoxScoreStats, &$homeBoxScoreStats) {
 
     $teamatbat = $row['TEAMATBAT'] === '0' ? $visBoxScoreStats : $homeBoxScoreStats;
 
     // assign a bb to batter stats and move batter to 1st
     foreach($teamatbat as $vs) {
         if($vs->playerid === $row['PLAYERID']) {
-            // $message = 'Add to walk total';
-            // showMessage($message);
-            $vs->stat_bb++;
+            $vs->batter_stat_bb++;
 
             if($walktype === 'IW') {
-                // $message = 'Add to intentional walk total';
-                // showMessage($message);
-                // $vs->stat_ibb++;
+                $vs->batter_stat_ibb++;
             }
 
         break;
@@ -254,57 +370,41 @@ function getWalks($row, $walktype) {
     }
 
     // move baserunners
-    moveBaseRunners($row, 'Walk');
+    moveBaseRunners($row, 'Walk', $gameState, $visBoxScoreStats, $homeBoxScoreStats);
 
-    checkRBI($row);
+    checkRBI($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
 }
 
-function getHitByPitch($row) {
-    global $visBoxScoreStats;
-    global $homeBoxScoreStats;
-    global $runnersOnBase;
+function getHitByPitch($row, &$gameState, &$visBoxScoreStats, &$homeBoxScoreStats) {
 
     $teamatbat = $row['TEAMATBAT'] === '0' ? $visBoxScoreStats : $homeBoxScoreStats;
 
     // assign a hbp to batter stats and move batter to 1st
     foreach($teamatbat as $vs) {
         if($vs->playerid === $row['PLAYERID']) {
-            // $message = 'Add to HBP total';
-            // showMessage($message);
-            $vs->stat_hbp++;
+            $vs->batter_stat_hbp++;
         break;
         }
     }
 
     // move baserunners
-    moveBaseRunners($row, 'HBP');
+    moveBaseRunners($row, 'HBP', $gameState, $visBoxScoreStats, $homeBoxScoreStats);
 
-    checkRBI($row);
+    checkRBI($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
 }
 
-function getStolenBase($row) {
-    global $visBoxScoreStats;
-    global $homeBoxScoreStats;
-    global $runnersOnBase;
+function getStolenBase($row, &$gameState, &$visBoxScoreStats, &$homeBoxScoreStats) {
 
     $teamatbat = $row['TEAMATBAT'] === '0' ? $visBoxScoreStats : $homeBoxScoreStats;
 
     // assign a sb to batter stats and move batter home
     if(strpos($row['OUTCOME'], 'SBH') !== false) {
-        $message = $runnersOnBase->runneron3rd . ' steals home!';
-        // showMessage($message);
-
         foreach($teamatbat as $vs) {
-            if($vs->playerid === $runnersOnBase->runneron3rd) {
-                // $message = ('Add to stolen base total for ' . $vs->playerid);
-                // showMessage($message);
+            if($vs->playerid === $gameState->runneron3rd) {
 
-                $vs->stat_sb++;
-                $vs->stat_r++;
-                $message = ('Remove runner on 3rd');
-
-                // showMessage($message);
-                $runnersOnBase->runneron3rd = 'None';
+                $vs->batter_stat_sb++;
+                $vs->batter_stat_r++;
+                $gameState->runneron3rd = 'None';
             break;
             }
         }
@@ -312,17 +412,11 @@ function getStolenBase($row) {
 
     // assign a sb to batter stats and move batter 3rd
     if(strpos($row['OUTCOME'], 'SB3') !== false) {
-        $message = $runnersOnBase->runneron2nd . ' steals third!';
-        // showMessage($message);
         foreach($teamatbat as $vs) {
-            if($vs->playerid === $runnersOnBase->runneron2nd) {
-                // $message = ('Add to stolen base total for ' . $vs->playerid);
-                // showMessage($message);
-                $vs->stat_sb++;
-                $message = ('Remove runner on 2nd');
-                // showMessage($message);
-                $runnersOnBase->runneron3rd = $vs->playerid;
-                $runnersOnBase->runneron2nd = 'None';
+            if($vs->playerid === $gameState->runneron2nd) {
+                $vs->batter_stat_sb++;
+                $gameState->runneron3rd = $vs->playerid;
+                $gameState->runneron2nd = 'None';
             break;
             }
         }
@@ -330,46 +424,36 @@ function getStolenBase($row) {
 
     // assign a sb to batter stats and move batter to 2nd
     if(strpos($row['OUTCOME'], 'SB2') !== false) {
-        $message = $runnersOnBase->runneron1st . ' steals second!';
-        // showMessage($message);
         foreach($teamatbat as $vs) {
-            if($vs->playerid === $runnersOnBase->runneron1st) {
-                // $message = 'Add to stolen base total for ' . $vs->playerid;
-                // showMessage($message);
-                $vs->stat_sb++;
-                $message = 'Remove runner on 1st';
-                // showMessage($message);
-                $runnersOnBase->runneron2nd = $vs->playerid;
-                $runnersOnBase->runneron1st = 'None';
+            if($vs->playerid === $gameState->runneron1st) {
+                $vs->batter_stat_sb++;
+                $gameState->runneron2nd = $vs->playerid;
+                $gameState->runneron1st = 'None';
             break;
             }
         }
     }
+
+    if($row['TEAMATBAT'] === '0') {
+        $gameState->visStolenBases++;
+    }
+    else {
+        $gameState->homeStolenBases++;
+    }
+
 }
 
-function getCaughtStealing($row) {
-    global $visBoxScoreStats;
-    global $homeBoxScoreStats;
-    global $runnersOnBase;
-    global $outs_in_the_inning;
+function getCaughtStealing($row, &$gameState, &$visBoxScoreStats, &$homeBoxScoreStats) {
 
     $teamatbat = $row['TEAMATBAT'] === '0' ? $visBoxScoreStats : $homeBoxScoreStats;
 
     // assign a sb to batter stats
     if(strpos($row['OUTCOME'], 'CSH') !== false) {
-        $message = $runnersOnBase->runneron3rd . ' caught stealing home!';
-        // showMessage($message);
 
         foreach($teamatbat as $vs) {
-            if($vs->playerid === $runnersOnBase->runneron3rd) {
-                // $message = 'Add to caught stealing base total for ' . $vs->playerid;
-                // showMessage($message);
-
-                $vs->stat_cs++;
-                $message = 'Remove runner on 3rd';
-
-                // showMessage($message);
-                $runnersOnBase->runneron3rd = 'None';
+            if($vs->playerid === $gameState->runneron3rd) {
+                $vs->batter_stat_cs++;
+                $gameState->runneron3rd = 'None';
             break;
             }
         }
@@ -377,16 +461,10 @@ function getCaughtStealing($row) {
 
     // assign a cs to batter stats
     if(strpos($row['OUTCOME'], 'CS3') !== false) {
-        $message = $runnersOnBase->runneron2nd . ' caught stealing third!';
-        // showMessage($message);
         foreach($teamatbat as $vs) {
-            if($vs->playerid === $runnersOnBase->runneron2nd) {
-                // $message = 'Add to caught stealing base total for ' . $vs->playerid;
-                // showMessage($message);
-                $vs->stat_cs++;
-                $message = 'Remove runner on 2nd';
-                // showMessage($message);
-                $runnersOnBase->runneron2nd = 'None';
+            if($vs->playerid === $gameState->runneron2nd) {
+                $vs->batter_stat_cs++;
+                $gameState->runneron2nd = 'None';
             break;
             }
         }
@@ -394,30 +472,27 @@ function getCaughtStealing($row) {
 
     // assign a cs to batter stats
     if(strpos($row['OUTCOME'], 'CS2') !== false) {
-        $message = $runnersOnBase->runneron1st . ' caught stealing second!';
-        // showMessage($message);
         foreach($teamatbat as $vs) {
-            if($vs->playerid === $runnersOnBase->runneron1st) {
-                // $message = 'Add to caught stealing base total for ' . $vs->playerid;
-                // showMessage($message);
-                $vs->stat_cs++;
-                $message = 'Remove runner on 1st';
-                // showMessage($message);
-                $runnersOnBase->runneron1st = 'None';
+            if($vs->playerid === $gameState->runneron1st) {
+                $vs->batter_stat_cs++;
+                $gameState->runneron1st = 'None';
             break;
             }
         }
     }
 
-    $outs_in_the_inning++;
+    $gameState->outs_in_the_inning++;
+
+    if($row['TEAMATBAT'] === '0') {
+        $gameState->visCaughtStealing++;
+    }
+    else {
+        $gameState->homeCaughtStealing++;
+    }
 
 }
 
-function moveBaseRunners($row, $outcome) {
-    global $visBoxScoreStats;
-    global $homeBoxScoreStats;
-    global $runnersOnBase;
-    global $outs_in_the_inning;
+function moveBaseRunners($row, $outcome, &$gameState, &$visBoxScoreStats, &$homeBoxScoreStats) {
 
     $batterMoved = false;
 
@@ -425,80 +500,66 @@ function moveBaseRunners($row, $outcome) {
 
     // runner out at Home
     if(strpos($row['OUTCOME'], '3XH')) {
-        $message = 'runner on 3rd out at home';
-        // showMessage($message);
-        $runnersOnBase->runneron3rd = 'None';
-        $outs_in_the_inning++;
+        $gameState->runneron3rd = 'None';
+        $gameState->outs_in_the_inning++;
     }
 
     // runner out at 3rd
     if(strpos($row['OUTCOME'], '3X3')) {
-        // showMessage('runner on 3rd out at 3rd');
-        $runnersOnBase->runneron3rd = 'None';
-        $outs_in_the_inning++;
+
+        $gameState->runneron3rd = 'None';
+        $gameState->outs_in_the_inning++;
     }
 
     // runner out at Home
     if(strpos($row['OUTCOME'], '2XH')) {
-        // showMessage('runner on 2nd out at home');
-        $runnersOnBase->runneron2nd = 'None';
-        $outs_in_the_inning++;
+
+        $gameState->runneron2nd = 'None';
+        $gameState->outs_in_the_inning++;
     }
 
     // runner out at 3rd
     if(strpos($row['OUTCOME'], '2X3')) {
-        // showMessage('runner on 2nd out at 3rd');
-        $runnersOnBase->runneron2nd = 'None';
-        $outs_in_the_inning++;
+        $gameState->runneron2nd = 'None';
+        $gameState->outs_in_the_inning++;
     }
 
     // runner out at 2nd
     if(strpos($row['OUTCOME'], '2X2')) {
-        // showMessage('runner on 2nd out at 2nd');
-        $runnersOnBase->runneron2nd = 'None';
-        $outs_in_the_inning++;
+        $gameState->runneron2nd = 'None';
+        $gameState->outs_in_the_inning++;
     }
 
     // runner out at Home
     if(strpos($row['OUTCOME'], '1XH')) {
-        // showMessage('runner on 1st out at home');
-        $runnersOnBase->runneron1st = 'None';
-        $outs_in_the_inning++;
+        $gameState->runneron1st = 'None';
+        $gameState->outs_in_the_inning++;
     }
 
     // runner out at 3rd
     if(strpos($row['OUTCOME'], '1X3')) {
-        // showMessage('runner on 1st out at 3rd');
-        $runnersOnBase->runneron1st = 'None';
-        $outs_in_the_inning++;
+        $gameState->runneron1st = 'None';
+        $gameState->outs_in_the_inning++;
     }
 
     // runner out at 2nd
     if(strpos($row['OUTCOME'], '1X2')) {
-        // showMessage('runner on 1st out at 2nd');
-        $runnersOnBase->runneron2nd = 'None';
-        $outs_in_the_inning++;
+        $gameState->runneron2nd = 'None';
+        $gameState->outs_in_the_inning++;
     }
 
     // runner out at 1st
     if(strpos($row['OUTCOME'], '1X1')) {
-        // showMessage('runner on 1st out at 1st');
-        $runnersOnBase->runneron1st = 'None';
-        $outs_in_the_inning++;
+        $gameState->runneron1st = 'None';
+        $gameState->outs_in_the_inning++;
     }
 
     // runner on 3rd scores
     if(strpos($row['OUTCOME'], '3-H') !== false) {
-        $message = ($runnersOnBase->runneron3rd . ' on 3rd base scores');
-        // showMessage($message);
         foreach($teamatbat as $vs) {
-            if($vs->playerid === $runnersOnBase->runneron3rd) {
-                // $message = 'Add run to ' . $vs->playerid;
-                // showMessage($message);
-                $vs->stat_r++;
-                $message = 'Remove runner on 3rd';
-                // showMessage($message);
-                $runnersOnBase->runneron3rd = 'None';
+            if($vs->playerid === $gameState->runneron3rd) {
+                $vs->batter_stat_r++;
+                $gameState->runneron3rd = 'None';
             break;
             }
         }
@@ -506,16 +567,10 @@ function moveBaseRunners($row, $outcome) {
 
     // runner on 2nd to Home
     if(strpos($row['OUTCOME'],'2-H') !== false) {
-        $message = $runnersOnBase->runneron2nd . ' on 2nd base scores';
-        // showMessage($message);
         foreach($teamatbat as $vs) {
-            if($vs->playerid === $runnersOnBase->runneron2nd) {
-                // $message = 'Add run to ' . $vs->playerid;
-                // showMessage($message);
-                $vs->stat_r++;
-                $message = 'Remove runner on 2nd';
-                // showMessage($message);
-                $runnersOnBase->runneron2nd = 'None';
+            if($vs->playerid === $gameState->runneron2nd) {
+                $vs->batter_stat_r++;
+                $gameState->runneron2nd = 'None';
             break;
             }
         }
@@ -523,26 +578,16 @@ function moveBaseRunners($row, $outcome) {
 
     // runner on 2nd to 3rd
     if(strpos($row['OUTCOME'],'2-3') !== false) {
-        $message = $runnersOnBase->runneron2nd . ' goes to 3rd';
-        // showMessage($message);
-        $runnersOnBase->runneron3rd = $runnersOnBase->runneron2nd;
-        $message = 'Runner no longer on 2nd';
-        // showMessage($message);
-        $runnersOnBase->runneron2nd = 'None';
+        $gameState->runneron3rd = $gameState->runneron2nd;
+        $gameState->runneron2nd = 'None';
     }
 
     // runner on 1st to Home
     if(strpos($row['OUTCOME'],'1-H') !== false) {
-        $message = $runnersOnBase->runneron1st . ' on 1st base scores';
-        // showMessage($message);
         foreach($teamatbat as $vs) {
-            if($vs->playerid === $runnersOnBase->runneron1st) {
-                // $message = 'Add run to ' . $vs->playerid;
-                // showMessage($message);
-                $vs->stat_r++;
-                $message = 'Remove runner on 1st';
-                // showMessage($message);
-                $runnersOnBase->runneron1st = 'None';
+            if($vs->playerid === $gameState->runneron1st) {
+                $vs->batter_stat_r++;
+                $gameState->runneron1st = 'None';
             break;
             }
         }
@@ -550,170 +595,177 @@ function moveBaseRunners($row, $outcome) {
 
     // runner on 1st to 3rd
     if(strpos($row['OUTCOME'],'1-3') !== false) {
-        $message = $runnersOnBase->runneron1st . ' goes to 3rd';
-        // showMessage($message);
-        $runnersOnBase->runneron3rd = $runnersOnBase->runneron1st;
-        $message = 'Runner on 1st no longer';
-        // showMessage($message);
-        $runnersOnBase->runneron1st = 'None';
+        $gameState->runneron3rd = $gameState->runneron1st;
+        $gameState->runneron1st = 'None';
     }
 
     // runner on 1st to 2nd
     if(strpos($row['OUTCOME'],'1-2') !== false) {
-        $message = $runnersOnBase->runneron1st . ' goes to 2nd';
-        // showMessage($message);
-        $runnersOnBase->runneron2nd = $runnersOnBase->runneron1st;
-        $message = 'Runner on 1st no longer';
-        // showMessage($message);
-        $runnersOnBase->runneron1st = 'None';
+        $gameState->runneron2nd = $gameState->runneron1st;
+        $gameState->runneron1st = 'None';
     }
 
     // batter to Home
     if(strpos($row['OUTCOME'],'B-H') !== false) {
-        $message = $row['PLAYERID'] . ' scores!';
-        // showMessage($message);
         foreach($teamatbat as $vs) {
             if($vs->playerid === $row['PLAYERID']) {
-                // $message = 'Add run to ' . $vs->playerid;
-                // showMessage($message);
-                $vs->stat_r++;
+                $vs->batter_stat_r++;
             break;
             }
         }
     }
     else if(strpos($row['OUTCOME'],'B-3') !== false) {
-        $message = $row['PLAYERID'] . ' goes to 3rd.';
-        // showMessage($message);
         $batterMoved = true;
-        $runnersOnBase->runneron3rd = $row['PLAYERID'];
+        $gameState->runneron3rd = $row['PLAYERID'];
     }
     else if(strpos($row['OUTCOME'],'B-2') !== false) {
-        $message = $row['PLAYERID'] . ' goes to 2nd.';
-        // showMessage($message);
         $batterMoved = true;
-        $runnersOnBase->runneron2nd = $row['PLAYERID'];
+        $gameState->runneron2nd = $row['PLAYERID'];
     }
     else if(strpos($row['OUTCOME'],'B-1') !== false) {
-        $message = $row['PLAYERID'] . ' goes to 1st.';
-        // showMessage($message);
         $batterMoved = true;
-        $runnersOnBase->runneron1st = $row['PLAYERID'];
+        $gameState->runneron1st = $row['PLAYERID'];
     }
 
     if(!$batterMoved) {
         if($outcome === 'Walk' || $outcome === 'Single' || $outcome === 'HBP') {
-            $message = $row['PLAYERID'] . ' goes to 1st with a ' . $outcome;
-            // showMessage($message);
-            $runnersOnBase->runneron1st = $row['PLAYERID'];
+            $gameState->runneron1st = $row['PLAYERID'];
         }
         else if($outcome === 'Double') {
-            $message = $row['PLAYERID'] . ' goes to 2nd with a double.';
-            // showMessage($message);
-            $runnersOnBase->runneron2nd = $row['PLAYERID'];
+            $gameState->runneron2nd = $row['PLAYERID'];
         }
         else if($outcome === 'Triple') {
-            $message = $row['PLAYERID'] . ' goes to 3rd with a triple.';
-            // showMessage($message);
-            $runnersOnBase->runneron3rd = $row['PLAYERID'];
+            $gameState->runneron3rd = $row['PLAYERID'];
         }
         else if($outcome === 'Error') {
-            $message = $row['PLAYERID'] . ' goes to 1st on the error.';
-            // showMessage($message);
-            $runnersOnBase->runneron1st = $row['PLAYERID'];
+            $gameState->runneron1st = $row['PLAYERID'];
         }
     }
-    
+
 }
 
-function getSingles($row) {
-    global $visBoxScoreStats;
-    global $homeBoxScoreStats;
+function getSingles($row, &$gameState, &$visBoxScoreStats, &$homeBoxScoreStats) {
 
     $teamatbat = $row['TEAMATBAT'] === '0' ? $visBoxScoreStats : $homeBoxScoreStats;
 
     // record a single and at-bat for batter
     foreach($teamatbat as $vs) {
         if($vs->playerid === $row['PLAYERID']) {
-            $vs->stat_1b++;
-            $vs->stat_ab++;
+            $vs->batter_stat_1b++;
+            $vs->batter_stat_ab++;
         }
     }
 
-    moveBaseRunners($row, 'Single');
+    if($gameState->runneron2nd !=='None' || $gameState->runneron3rd !=='None') {
+        if($row['TEAMATBAT'] === '0') {
+            $gameState->risp_vis_ab++;
+            $gameState->risp_vis_h++;
+        }
+        else {
+            $gameState->risp_home_ab++;
+            $gameState->risp_home_h++;
+        }
+    }
+
+    moveBaseRunners($row, 'Single', $gameState, $visBoxScoreStats, $homeBoxScoreStats);
 
     // check for RBI
-    checkRBI($row);
+    checkRBI($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
 }
 
-function getDoubles($row) {
-    global $visBoxScoreStats;
-    global $homeBoxScoreStats;
+function getDoubles($row, &$gameState, &$visBoxScoreStats, &$homeBoxScoreStats) {
 
     $teamatbat = $row['TEAMATBAT'] === '0' ? $visBoxScoreStats : $homeBoxScoreStats;
 
     // record a double and at-bat for batter
     foreach($teamatbat as $vs) {
         if($vs->playerid === $row['PLAYERID']) {
-            $vs->stat_2b++;
-            $vs->stat_ab++;
+            $vs->batter_stat_2b++;
+            $vs->batter_stat_ab++;
         }
     }
 
-    moveBaseRunners($row, 'Double');
+    if($gameState->runneron2nd !=='None' || $gameState->runneron3rd !=='None') {
+        if($row['TEAMATBAT'] === '0') {
+            $gameState->risp_vis_ab++;
+            $gameState->risp_vis_h++;
+        }
+        else {
+            $gameState->risp_home_ab++;
+            $gameState->risp_home_h++;
+        }
+    }
+
+    moveBaseRunners($row, 'Double', $gameState, $visBoxScoreStats, $homeBoxScoreStats);
 
     // check for RBI
-    checkRBI($row);
+    checkRBI($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
 }
 
-function getTriples($row) {
-    global $visBoxScoreStats;
-    global $homeBoxScoreStats;
+function getTriples($row, &$gameState, &$visBoxScoreStats, &$homeBoxScoreStats) {
 
     $teamatbat = $row['TEAMATBAT'] === '0' ? $visBoxScoreStats : $homeBoxScoreStats;
 
     // record a triple and at-bat for batter
     foreach($teamatbat as $vs) {
         if($vs->playerid === $row['PLAYERID']) {
-            $vs->stat_3b++;
-            $vs->stat_ab++;
+            $vs->batter_stat_3b++;
+            $vs->batter_stat_ab++;
         }
     }
 
-    moveBaseRunners($row, 'Triple');
+    if($gameState->runneron2nd !=='None' || $gameState->runneron3rd !=='None') {
+        if($row['TEAMATBAT'] === '0') {
+            $gameState->risp_vis_ab++;
+            $gameState->risp_vis_h++;
+        }
+        else {
+            $gameState->risp_home_ab++;
+            $gameState->risp_home_h++;
+        }
+    }
+
+    moveBaseRunners($row, 'Triple', $gameState, $visBoxScoreStats, $homeBoxScoreStats);
 
     // check for RBI
-    checkRBI($row);
+    checkRBI($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
 }
 
-function getHomeruns($row) {
-    global $visBoxScoreStats;
-    global $homeBoxScoreStats;
-    global $outs_in_the_inning;
+function getHomeruns($row, &$gameState, &$visBoxScoreStats, &$homeBoxScoreStats) {
 
     $teamatbat = $row['TEAMATBAT'] === '0' ? $visBoxScoreStats : $homeBoxScoreStats;
 
     // record a homerun and at-bat for batter
     foreach($teamatbat as $vs) {
         if($vs->playerid === $row['PLAYERID']) {
-            $vs->stat_hr++;
-            $vs->stat_r++;
-            $vs->stat_ab++;
-            $vs->stat_rbi++;
-            if($outs_in_the_inning === 2) {
-                $vs->stat_rbi_2_out++;
+            $vs->batter_stat_hr++;
+            $vs->batter_stat_r++;
+            $vs->batter_stat_ab++;
+            $vs->batter_stat_rbi++;
+            if($gameState->outs_in_the_inning === 2) {
+                $vs->batter_stat_rbi_2_out++;
             }
         }
     }
 
-    moveBaseRunners($row, 'Homerun');
+    if($gameState->runneron2nd !=='None' || $gameState->runneron3rd !=='None') {
+        if($row['TEAMATBAT'] === '0') {
+            $gameState->risp_vis_ab++;
+            $gameState->risp_vis_h++;
+        }
+        else {
+            $gameState->risp_home_ab++;
+            $gameState->risp_home_h++;
+        }
+    }
+
+    moveBaseRunners($row, 'Homerun', $gameState, $visBoxScoreStats, $homeBoxScoreStats);
 
     // check for RBI
-    checkRBI($row);
+    checkRBI($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
 }
 
-function getWildPitch($row) {
-    global $visPitcherBoxScoreStats;
-    global $homePitcherBoxScoreStats;
+function getWildPitch($row, &$gameState, &$visBoxScoreStats, &$homeBoxScoreStats, &$visPitcherBoxScoreStats, &$homePitcherBoxScoreStats) {
 
     $teamatbat = $row['TEAMATBAT'] === '0' ? $visPitcherBoxScoreStats : $homePitcherBoxScoreStats;
 
@@ -725,13 +777,10 @@ function getWildPitch($row) {
     }
 
     // check for runner movement
-    moveBaseRunners($row, '');
+    moveBaseRunners($row, '', $gameState, $visBoxScoreStats, $homeBoxScoreStats);
 }
 
-function checkRBI($row) {
-    global $visBoxScoreStats;
-    global $homeBoxScoreStats;
-    global $outs_in_the_inning;
+function checkRBI($row, &$gameState, &$visBoxScoreStats, &$homeBoxScoreStats) {
 
     $teamatbat = $row['TEAMATBAT'] === '0' ? $visBoxScoreStats : $homeBoxScoreStats;
 
@@ -756,10 +805,10 @@ function checkRBI($row) {
     // assign RBI
     foreach($teamatbat as $vs) {
         if($vs->playerid === $row['PLAYERID']) {
-            $vs->stat_rbi += $rbiCount;
+            $vs->batter_stat_rbi += $rbiCount;
 
-            if($outs_in_the_inning === 2) {
-                $vs->stat_rbi_2_out += $rbiCount;
+            if($gameState->outs_in_the_inning === 2) {
+                $vs->batter_stat_rbi_2_out += $rbiCount;
             }
         break;
         }
@@ -770,231 +819,208 @@ function showMessage($msg) {
     echo "<script type='text/javascript'>alert('$msg');</script>";
 }
 
-function getOut($row) {
-    global $visBoxScoreStats;
-    global $homeBoxScoreStats;
-    global $runnersOnBase;
-    global $outs_in_the_inning;
+function getOut($row, &$gameState, &$visBoxScoreStats, &$homeBoxScoreStats) {
 
     $outs = 0;
+
+    $total_outs_before = $gameState->outs_in_the_inning;
 
     $teamatbat = $row['TEAMATBAT'] === '0' ? $visBoxScoreStats : $homeBoxScoreStats;
 
     if(strpos($row['OUTCOME'], '(1)') !== false) {
         // runner on 1st is out
-        $message = $runnersOnBase->runneron1st . ' out at 2nd.';
-        // showMessage($message);
-        $message = $runnersOnBase->runneron1st . ' removed from 1st.';
-        // showMessage($message);
-        $runnersOnBase->runneron1st = 'None';
+        $gameState->runneron1st = 'None';
         $outs++;
     }
 
     if(strpos($row['OUTCOME'], '(2)') !== false) {
         // runner on 2nd is out
-        $message = $runnersOnBase->runneron2nd . ' out at 3rd.';
-        // showMessage($message);
-        $message = $runnersOnBase->runneron2nd . ' removed from 2nd.';
-        // showMessage($message);
-        $runnersOnBase->runneron2nd = 'None';
+        $gameState->runneron2nd = 'None';
         $outs++;
     }
 
     if(strpos($row['OUTCOME'], '(3)') !== false) {
         // runner on 3rd is out
-        $message = $runnersOnBase->runneron3rd . ' out at home.';
-        // showMessage($message);
-        $message = $runnersOnBase->runneron3rd . ' removed from 3rd.';
-        // showMessage($message);
-        $runnersOnBase->runneron3rd = 'None';
-        $outs++;
-    }
-
-    if(strpos($row['OUTCOME'], 'GDP') !== false) {
+        $gameState->runneron3rd = 'None';
         $outs++;
     }
 
     if(strpos($row['OUTCOME'], 'SF') !== false) {
         // no at-bat for sac fly
-        $message = 'Batter is out on a sac fly.';
-        // showMessage($message);
         // check for baserunner movement
-        moveBaseRunners($row, '');
+        moveBaseRunners($row, '', $gameState, $visBoxScoreStats, $homeBoxScoreStats);
 
         foreach($teamatbat as $vs) {
             if($vs->playerid === $row['PLAYERID']) {
-                $vs->stat_sf++;
-                $vs->stat_rbi++;
+                $vs->batter_stat_sf++;
+                $vs->batter_stat_rbi++;
                 $outs++;
+            break;
             }
         }
     }
     else if(strpos($row['OUTCOME'], 'SH') !== false) {
         // no at-bat for sac bunts
-        $message = 'Batter is out on a sac hit.';
-        // showMessage($message);
         // check for baserunner movement
-        moveBaseRunners($row, '');
+
+        moveBaseRunners($row, '', $gameState, $visBoxScoreStats, $homeBoxScoreStats);
+
         foreach($teamatbat as $vs) {
             if($vs->playerid === $row['PLAYERID']) {
-                $vs->stat_sh++;
+                $vs->batter_stat_sh++;
                 $outs++;
+            break;
             }
         }
     }
     else {
-        // showMessage('Batter is out.');
         // check for baserunner movement
-        moveBaseRunners($row, '');
+        if($gameState->runneron2nd !=='None' || $gameState->runneron3rd !=='None') {
+            if($row['TEAMATBAT'] === '0') {
+                $gameState->risp_vis_ab++;
+            }
+            else {
+                $gameState->risp_home_ab++;
+            }
+        }
+
+        moveBaseRunners($row, '', $gameState, $visBoxScoreStats, $homeBoxScoreStats);
+
         foreach($teamatbat as $vs) {
             if($vs->playerid === $row['PLAYERID']) {
-                $vs->stat_ab++;
+                $vs->batter_stat_ab++;
                 $outs++;
+            break;
             }
         }
     }
 
-    $outs_in_the_inning += $outs;
+    checkRBI($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
 
-}
+    $gameState->outs_in_the_inning += $outs;
 
-function getErrors($row) {
-    // Batter to 1st unless it states otherwise
-    moveBaseRunners($row, 'Error');
-}
-
-function checkEndOfInning($row) {
-    global $gameTeamAtBat;
-    global $runnersOnBase;
-    global $outs_in_the_inning;
-    global $visTeamLOB;
-    global $homeTeamLOB;
-
-    if($row['TEAMATBAT'] != $gameTeamAtBat && $row['CATEGORY'] !== 'com' && $row['CATEGORY'] !== 'sub') {
-        // assign runners LOB to correct team
-
-        if($gameTeamAtBat === 0) {
-            // showMessage($runnersOnBase->runneron1st . ', ' . $runnersOnBase->runneron2nd . ', ' . $runnersOnBase->runneron3rd);
-            $visTeamLOB += calculateTotalRunnersOnBase();
+    if(strpos($row['OUTCOME'], 'DP') !== false) {
+        if($row['TEAMATBAT'] === '0') {
+            $gameState->home_double_plays_turned++;
         }
         else {
-            // showMessage($runnersOnBase->runneron1st . ', ' . $runnersOnBase->runneron2nd . ', ' . $runnersOnBase->runneron3rd);
-            $homeTeamLOB += calculateTotalRunnersOnBase();
+            $gameState->vis_double_plays_turned++;
+        }
+    }
+
+}
+
+function getPositionByNumber($num) {
+    $pos = ['', 'P', 'C', '1B', '2B', '3B', 'SS', 'LF', 'CF', 'RF'];
+    
+    return $pos[$num];
+}
+
+function getErrors($row, &$gameState, &$visBoxScoreStats, &$homeBoxScoreStats, &$visPitcherBoxScoreStats, &$homePitcherBoxScoreStats) {
+
+    $player_error = '';
+    $errorsMade = 0;
+
+    if($row['OUTCOME'][0] === 'E') {
+        // batter gets on base because of an error
+        if($gameState->runneron2nd !=='None' || $gameState->runneron3rd !=='None') {
+            if($row['TEAMATBAT'] === '0') {
+                $gameState->risp_vis_ab++;
+            }
+            else {
+                $gameState->risp_home_ab++;
+            }
+        }
+    }
+
+    $teamatbat = $row['TEAMATBAT'] === '0' ? $visBoxScoreStats : $homeBoxScoreStats;
+
+    $pitcher_teamatbat = $row['TEAMATBAT'] === '0' ? $visPitcherBoxScoreStats : $homePitcherBoxScoreStats;
+
+    // fielders other than the pitcher check
+    for($i = 2; $i < 10; $i++) {
+
+        $errorsMade = substr_count($row['OUTCOME'], 'E' . $i);
+
+        if($errorsMade > 0) {
+            // get position of fielder who made error
+            $fielder_who_made_error = 'pos_' . getPositionByNumber($i);
+            // assign error to that player
+            $fieldingteam = $row['TEAMATBAT'] === '0' ? $homeBoxScoreStats : $visBoxScoreStats;
+
+            foreach($fieldingteam as $vs) {
+
+                if($vs->playerid === $gameState->visDefense->$fielder_who_made_error) {
+                    $vs->fielder_stat_error += $errorsMade;
+
+                    if($row['TEAMATBAT'] === '0') {
+                        $gameState->homeErrors += $errorsMade;
+                    }
+                    else {
+                        $gameState->visErrors += $errorsMade;
+                    }
+                break;
+                }
+            }
+        }
+    }
+
+    // check pitchers
+    $errorsMade = substr_count($row['OUTCOME'], 'E1');
+
+    if($errorsMade > 0) {
+        foreach($pitcher_teamatbat as $vs) {
+            if($vs->playerid === $row['pitcherid']) {
+                $vs->fielder_stat_error += $errorsMade;
+
+                if($row['TEAMATBAT'] === '0') {
+                    $gameState->homeErrors += $errorsMade;
+                }
+                else {
+                    $gameState->visErrors += $errorsMade;
+                }
+            }
+        }
+    }
+
+    // Batter to 1st unless it states otherwise
+    moveBaseRunners($row, 'Error', $gameState, $visBoxScoreStats, $homeBoxScoreStats);
+
+}
+
+function checkEndOfInning($row, &$gameState) {
+
+    $count = 0;
+
+    if($row['TEAMATBAT'] != $gameState->teamatbat && $row['CATEGORY'] !== 'com' && $row['CATEGORY'] !== 'sub') {
+        // assign runners LOB to correct team
+
+        if($gameState->teamatbat === 0) {
+            if($gameState->runneron1st !== 'None') {
+                $count++;
+            }
+
+            if($gameState->runneron2nd !== 'None') {
+                $count++;
+            }
+
+            if($gameState->runneron3rd !== 'None') {
+                $count++;
+            }
+
+            $gameState->visTeamLOB += $count;
+        }
+        else {
+
         }
 
-        $runnersOnBase->clearRunners();
-        $gameTeamAtBat ^= 1;
-        $outs_in_the_inning = 0;
+        $gameState->clearRunners();
+        $gameState->teamatbat ^= 1;
+        $gameState->outs_in_the_inning = 0;
     }
 }
 
-function checkForStrikeouts($row) {
-    if($row['OUTCOME'][0]==='K') {
-        $message = (($row['PLAYERID'] . ' strikes out.'));
-        // showMessage($message);
-        getStrikeouts($row);
-    }
-}
-
-function checkForWalks($row) {
-    if($row['OUTCOME'][0]==='W' && $row['OUTCOME'][1] !== 'P') {
-        $message = ($row['PLAYERID'] . ' gets a walk.');
-        // showMessage($message);
-        getWalks($row, 'W');
-    }
-}
-
-function checkForIntentionalWalks($row) {
-    if(strpos($row['OUTCOME'], 'IW') !== false) {
-        $message = ($row['PLAYERID'] . ' gets an intentional walk.');
-        // showMessage($message);
-        getWalks($row, 'IW');
-    }
-}
-
-function checkForSingles($row) {
-    if($row['OUTCOME'][0]==='S' and $row['OUTCOME'][1] !== 'B') {
-        $message = ($row['PLAYERID'] . ' gets a single.');
-        // showMessage($message);
-        getSingles($row);
-    }
-}
-
-function checkForDoubles($row) {
-    if($row['OUTCOME'][0]==='D' and $row['OUTCOME'][1] !== 'I') {
-        $message = ($row['PLAYERID'] . ' gets a double.');
-        // showMessage($message);
-        getDoubles($row);
-    }
-}
-
-function checkForTriples($row) {
-    if($row['OUTCOME'][0]==='T') {
-        $message = ($row['PLAYERID'] . ' gets a triple.');
-        // showMessage($message);
-        getTriples($row);
-    }
-}
-
-function checkForHomeruns($row) {
-    if(strpos($row['OUTCOME'], 'HR') !== false) {
-        $message = ($row['PLAYERID'] . ' gets a homerun.');
-        // showMessage($message);
-        getHomeRuns($row);
-    }
-}
-
-function checkForWildPitch($row) {
-    if(strpos($row['OUTCOME'], 'WP') !== false) {
-        $message = 'WILD PITCH!';
-        // showMessage($message);
-        getWildPitch($row);
-    }
-}
-
-function checkForHitByPitch($row) {
-    if(strpos($row['OUTCOME'], 'HP') !== false) {
-        $message = $row['PLAYERID'] . ' is HBP.';
-        // showMessage($message);
-        getHitByPitch($row);
-    }
-}
-
-function checkForStolenBase($row) {
-    if(strpos($row['OUTCOME'], 'SB') !== false) {
-        $message = 'STOLEN BASE';
-        // showMessage($message);
-        getStolenBase($row);
-    }
-}
-
-function checkForCaughtStealing($row) {
-    if(strpos($row['OUTCOME'], 'CS') !== false) {
-        $message = 'CAUGHT STEALING';
-        // showMessage($message);
-        getCaughtStealing($row);
-    }
-}
-
-function checkForErrors($row) {
-    if($row['OUTCOME'][0] === 'E') {
-        $message = 'Error on the play';
-        // showMessage($message);
-        getErrors($row, 'Error');
-    }
-}
-
-function checkForOuts($row) {
-    if($row['OUTCOME'][0] === '1' || $row['OUTCOME'][0] === '2' || $row['OUTCOME'][0] === '3' || $row['OUTCOME'][0] === '4' || $row['OUTCOME'][0] === '5' || $row['OUTCOME'][0] === '6' || $row['OUTCOME'][0] === '7' || $row['OUTCOME'][0] === '8' || $row['OUTCOME'][0] === '9' || strpos($row['OUTCOME'], 'FC') !== false) {
-        getOut($row);
-    }
-}
-
-function checkForSub($row) {
-    global $visBoxScoreStats;
-    global $homeBoxScoreStats;
-    global $visSubCount;
-    global $homeSubCount;
+function checkForSub($row, &$gameState, &$visBoxScoreStats, &$homeBoxScoreStats) {
 
     $subBatter = new playerStat();
 
@@ -1018,18 +1044,27 @@ function checkForSub($row) {
                 }
             }
 
+            // replace player in current lineup
+            // foreach($lineup as $l) {
+            //     if($l->playerid === $subBatter->playerid) {
+            //         $l->playerid = $subBatter->playerid;
+            //         $l->playerpos = $subBatter->playerpos;
+            //     break;
+            //     }
+            // }
+
             if($row['PLAYERID'] === '0') {
-                //insert new player into lineup
+                //insert new player into box score
 
-                array_splice($visBoxScoreStats, $row['COUNT'] + $visSubCount, 0, [$subBatter]);
+                array_splice($visBoxScoreStats, $row['COUNT'] + $gameState->visSubCount, 0, [$subBatter]);
 
-                $visSubCount++;
+                $gameState->visSubCount++;
             }
             else {
-                //insert new player into lineup
-                array_splice($homeBoxScoreStats, $row['COUNT'] + $homeSubCount, 0, [$subBatter]);
+                //insert new player into box score
+                array_splice($homeBoxScoreStats, $row['COUNT'] + $gameState->homeSubCount, 0, [$subBatter]);
 
-                $homeSubCount++;
+                $gameState->homeSubCount++;
             }
 
         }
@@ -1042,34 +1077,4 @@ function getPosition($num) {
     return $pos[$num-1];
 }
 
-function calculateTotalRunnersOnBase() {
-    global $runnersOnBase;
-
-    $count = 0;
-    
-    if($runnersOnBase->runneron1st !== 'None') {
-        // showMessage('one');
-        $count++;
-    }
-
-    if($runnersOnBase->runneron2nd !== 'None') {
-        // showMessage('two');
-        $count++;
-    }
-
-    if($runnersOnBase->runneron3rd !== 'None') {
-        // showMessage('three');
-        $count++;
-    }
-
-    showMessage($count . ' total runners');
-
-    return $count;
-}
-
-function showRunners() {
-    global $runnersOnBase;
-
-    // showMessage('1st: ' . $runnersOnBase->runneron1st . ', 2nd: ' . $runnersOnBase->runneron2nd . ', 3rd: ' . $runnersOnBase->runneron3rd);
-}
 ?>
