@@ -46,9 +46,6 @@
         public $visTeamLOB = 0;
         public $homeTeamLOB = 0;
 
-        public $visSubCount = 0;
-        public $homeSubCount = 0;
-
         public $risp_vis_ab = 0;
         public $risp_vis_h = 0;
         public $risp_home_ab = 0;
@@ -65,6 +62,9 @@
 
         public $visDefense;
         public $homeDefense;
+
+        public $visLineup = [];
+        public $homeLineup = [];
 
         public $vis_double_plays_turned = 0;
         public $home_double_plays_turned = 0;
@@ -159,29 +159,21 @@
 
             // // wild pitch
             if(strpos($row['OUTCOME'], 'WP') !== false) {
-                // $message = 'WILD PITCH!';
-                // showMessage($message);
                 getWildPitch($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats, $visPitcherBoxScoreStats, $homePitcherBoxScoreStats);
             }
 
             // // hit by pitch
             if(strpos($row['OUTCOME'], 'HP') !== false) {
-                // $message = $row['PLAYERID'] . ' is HBP.';
-                // showMessage($message);
                 getHitByPitch($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
             }
 
             // // get steals
             if(strpos($row['OUTCOME'], 'SB') !== false) {
-                // $message = 'STOLEN BASE';
-                // showMessage($message);
                 getStolenBase($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
             }
 
             // // get caught stealing
             if(strpos($row['OUTCOME'], 'CS') !== false) {
-                // $message = 'CAUGHT STEALING';
-                // showMessage($message);
                 getCaughtStealing($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
             }
 

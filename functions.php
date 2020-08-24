@@ -83,7 +83,8 @@ function getVisitorLineup($linky, $gameid, &$gameState, &$visBoxScoreStats, &$ho
 
             // assign position to visDefense
             $gameState->visDefense->$tempPos = $batterS->playerid;
-
+            
+            array_push($gameState->visLineup, $batterS->playerid);
             array_push($visBoxScoreStats, $batterS);
         }
     }
@@ -401,7 +402,6 @@ function getStolenBase($row, &$gameState, &$visBoxScoreStats, &$homeBoxScoreStat
     if(strpos($row['OUTCOME'], 'SBH') !== false) {
         foreach($teamatbat as $vs) {
             if($vs->playerid === $gameState->runneron3rd) {
-
                 $vs->batter_stat_sb++;
                 $vs->batter_stat_r++;
                 $gameState->runneron3rd = 'None';
@@ -415,8 +415,7 @@ function getStolenBase($row, &$gameState, &$visBoxScoreStats, &$homeBoxScoreStat
         foreach($teamatbat as $vs) {
             if($vs->playerid === $gameState->runneron2nd) {
                 $vs->batter_stat_sb++;
-                $gameState->runneron3rd = $vs->playerid;
-                $gameState->runneron2nd = 'None';
+                moveBaseRunners($row, 'SB3', $gameState, $visBoxScoreStats, $homeBoxScoreStats);
             break;
             }
         }
@@ -427,8 +426,7 @@ function getStolenBase($row, &$gameState, &$visBoxScoreStats, &$homeBoxScoreStat
         foreach($teamatbat as $vs) {
             if($vs->playerid === $gameState->runneron1st) {
                 $vs->batter_stat_sb++;
-                $gameState->runneron2nd = $vs->playerid;
-                $gameState->runneron1st = 'None';
+                moveBaseRunners($row, 'SB2', $gameState, $visBoxScoreStats, $homeBoxScoreStats);
             break;
             }
         }
@@ -605,8 +603,24 @@ function moveBaseRunners($row, $outcome, &$gameState, &$visBoxScoreStats, &$home
         $gameState->runneron1st = 'None';
     }
 
+    // stolen bases
+    if($outcome === 'SB3') {
+        if($gameState->runneron2nd !== '') {
+            $gameState->runneron3rd = $gameState->runneron2nd;
+            $gameState->runneron2nd = '';
+        }
+    }
+
+    if($outcome === 'SB2') {
+        if($gameState->runneron1st !== '') {
+            $gameState->runneron2nd = $gameState->runneron1st;
+            $gameState->runneron1st = '';
+        }
+    }
+
     // batter to Home
     if(strpos($row['OUTCOME'],'B-H') !== false) {
+        $batterMoved = true;
         foreach($teamatbat as $vs) {
             if($vs->playerid === $row['PLAYERID']) {
                 $vs->batter_stat_r++;
@@ -626,6 +640,10 @@ function moveBaseRunners($row, $outcome, &$gameState, &$visBoxScoreStats, &$home
         $batterMoved = true;
         $gameState->runneron1st = $row['PLAYERID'];
     }
+    else if(strpos($row['OUTCOME'], 'FO') !== false) {
+        $batterMoved = true;
+        $gameState->runneron1st = $row['PLAYERID'];
+    }
 
     if(!$batterMoved) {
         if($outcome === 'Walk' || $outcome === 'Single' || $outcome === 'HBP') {
@@ -641,7 +659,6 @@ function moveBaseRunners($row, $outcome, &$gameState, &$visBoxScoreStats, &$home
             $gameState->runneron1st = $row['PLAYERID'];
         }
     }
-
 }
 
 function getSingles($row, &$gameState, &$visBoxScoreStats, &$homeBoxScoreStats) {
@@ -1025,48 +1042,81 @@ function checkForSub($row, &$gameState, &$visBoxScoreStats, &$homeBoxScoreStats)
     $subBatter = new playerStat();
 
     if($row['CATEGORY'] === 'sub') {
+
         // determine whether a new pitcher or batter is being substituted
+
         if($row['PITCHES'] !== '1') {
             // not a pitcher
 
             $teamatbat = $row['PLAYERID'] === '0' ? $visBoxScoreStats : $homeBoxScoreStats;
 
-            // assign playerid to new batter stats
-            $subBatter->playerid = $row['INNING'];
-            $subBatter->playerpos = getPosition($row['PITCHES']);
-            $subBatter->status = 'sub';
+            $foundInLineup = false;
 
-            // is the player listed in the lineup already, just moving positions?
-            foreach($teamatbat as $vs) {
-                if($vs->playerid === $subBatter->playerid) {
-                    $vs->playerpos = $vs->playerpos . '-' . getPosition($row['PITCHES']);
-                return;
+            for($i = 0; $i < 9; $i++) {
+                if($gameState->visLineup[$i] === $row['INNING']) {
+                    $foundInLineup = true;
+                break;
                 }
             }
 
-            // replace player in current lineup
-            // foreach($lineup as $l) {
-            //     if($l->playerid === $subBatter->playerid) {
-            //         $l->playerid = $subBatter->playerid;
-            //         $l->playerpos = $subBatter->playerpos;
-            //     break;
-            //     }
-            // }
+            if(!$foundInLineup) {
+                // assign playerid to new batter stats
+                $subBatter->playerid = $row['INNING'];
+                $subBatter->playerpos = getPosition($row['PITCHES']);
+                $subBatter->status = 'sub';
 
-            if($row['PLAYERID'] === '0') {
-                //insert new player into box score
+                // place new sub in lineup
+                if($row['PLAYERID'] === '0') {
+                    // player being subbed out
+                    $temp_playerid = $gameState->visLineup[$row['COUNT']-1];
 
-                array_splice($visBoxScoreStats, $row['COUNT'] + $gameState->visSubCount, 0, [$subBatter]);
+                    $vCount = 0;
 
-                $gameState->visSubCount++;
+                    foreach($visBoxScoreStats as $vs) {
+                        if($vs->playerid === $temp_playerid) {
+                            array_splice($visBoxScoreStats, $vCount + 1, 0, [$subBatter]);
+                            $gameState->visLineup[$row['COUNT']-1] = $temp_playerid;
+                        break;
+                        }
+                        $vCount++;
+                    }
+
+                    $gameState->visLineup[$row['COUNT']-1] = $subBatter->playerid;
+                    showMessage($gameState->visLineup[8]);
+                    $gameState->visDefense->$temp_pos = $subBatter->playerid;
+                }
+                else {
+                    // player being subbed out
+                    $temp_playerid = $gameState->homeLineup[$row['COUNT']-1];
+
+                    $hCount = 0;
+
+                    foreach($homeBoxScoreStats as $vs) {
+                        if($vs->playerid === $temp_playerid) {
+                            array_splice($homeBoxScoreStats, $hCount + 1, 0, [$subBatter]);
+                            $gameState->homeLineup[$row['COUNT']-1] = $temp_playerid;
+                        break;
+                        }
+                        $hCount++;
+                    }
+
+                    $gameState->homeLineup[$row['COUNT']-1] = $subBatter->playerid;
+                    $gameState->homeDefense->$temp_pos = $subBatter->playerid;                }
             }
             else {
-                //insert new player into box score
-                array_splice($homeBoxScoreStats, $row['COUNT'] + $gameState->homeSubCount, 0, [$subBatter]);
+                // switch position
+                $temp_pos = 'pos_' . getPosition($row['PITCHES']);
 
-                $gameState->homeSubCount++;
+                // assign playerid to new position
+                $gameState->visDefense->$temp_pos = $row['INNING'];
+
+                foreach($teamatbat as $ta) {
+                    if($ta->playerid === $row['INNING']) {
+                        $ta->playerpos .= '-' . getPosition($row['PITCHES']);
+                    break;
+                    }
+                }
             }
-
         }
     }
 }
