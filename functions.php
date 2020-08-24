@@ -605,16 +605,16 @@ function moveBaseRunners($row, $outcome, &$gameState, &$visBoxScoreStats, &$home
 
     // stolen bases
     if($outcome === 'SB3') {
-        if($gameState->runneron2nd !== '') {
+        if($gameState->runneron2nd !== 'None') {
             $gameState->runneron3rd = $gameState->runneron2nd;
-            $gameState->runneron2nd = '';
+            $gameState->runneron2nd = 'None';
         }
     }
 
     if($outcome === 'SB2') {
-        if($gameState->runneron1st !== '') {
+        if($gameState->runneron1st !== 'None') {
             $gameState->runneron2nd = $gameState->runneron1st;
-            $gameState->runneron1st = '';
+            $gameState->runneron1st = 'None';
         }
     }
 
@@ -1082,7 +1082,6 @@ function checkForSub($row, &$gameState, &$visBoxScoreStats, &$homeBoxScoreStats)
                     }
 
                     $gameState->visLineup[$row['COUNT']-1] = $subBatter->playerid;
-                    showMessage($gameState->visLineup[8]);
                     $gameState->visDefense->$temp_pos = $subBatter->playerid;
                 }
                 else {
