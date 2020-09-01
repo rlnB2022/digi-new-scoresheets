@@ -171,10 +171,15 @@
             </div>
         </header>
 
+        <div>
+            <button id="#test-pitches">Test</button>
+        </div>
+
         <section id="gridgames" class="grid-of-games">
             <div id="myboxscore" class="boxscore">
                 
             </div>
+
             <?php
 
                 $sql = "SELECT * FROM GAMELOGS WHERE date = " . $year . $month . $day;

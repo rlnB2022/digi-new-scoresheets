@@ -1,101 +1,3 @@
-<?php
-    include "configtest.php";
-    include "functions.php";
-
-    $gameid = $_POST['gameid'];
-
-    $visBoxScoreStats = [];
-    $visPitcherBoxScoreStats = [];
-    $homeBoxScoreStats = [];
-    $homePitcherBoxScoreStats =[];
-
-    $hometeam = substr($gameid,0,3);
-    $gamedate = substr($gameid,3,8);
-    $gamenum = substr($gameid,11,1);
-    $year = substr($gamedate,0,4);
-    $month = getMonth(substr($gamedate,4,2));
-    $day = substr($gamedate,6,2);
-
-    class TotalBases {
-        public $playerid;
-        public $bases;
-    }
-
-    class TotalRBI {
-        public $playerid;
-        public $rbi;
-    }
-
-    class Defense {
-        public $pos_P = '';
-        public $pos_C = '';
-        public $pos_1B = '';
-        public $pos_2B = '';
-        public $pos_3B = '';
-        public $pos_SS = '';
-        public $pos_LF = '';
-        public $pos_CF = '';
-        public $pos_RF = '';
-        public $pos_DH = '';
-    }
-
-    class GameStatus {
-        public $outs = 0;
-        public $outs_in_the_inning = 0;
-        public $teamatbat = 0;
-
-        public $visTeamLOB = 0;
-        public $homeTeamLOB = 0;
-
-        public $visTeamGDP = 0;
-        public $homeTeamGDP = 0;
-
-        public $visTeamPickoffs = 0;
-        public $homeTeamPickoffs = 0;
-
-        public $risp_vis_ab = 0;
-        public $risp_vis_h = 0;
-        public $risp_home_ab = 0;
-        public $risp_home_h = 0;
-
-        public $vis_errors = 0;
-        public $home_errors = 0;
-
-        public $visStolenBases = 0;
-        public $homeStolenBases = 0;
-
-        public $visCaughtStealing = 0;
-        public $homeCaughtStealing = 0;
-
-        public $visDefense;
-        public $homeDefense;
-
-        public $visLineup = [];
-        public $homeLineup = [];
-
-        public $vis_double_plays_turned = 0;
-        public $home_double_plays_turned = 0;
-
-        public $runneron1st = 'None';
-        public $runneron2nd = 'None';
-        public $runneron3rd = 'None';
-
-        public function clearRunners() {
-            $this->runneron1st = 'None';
-            $this->runneron2nd = 'None';
-            $this->runneron3rd = 'None';
-        }
-    }
-
-    $gameState = new GameStatus();
-    $gameState->visDefense = new Defense();
-    $gameState->homeDefense = new Defense();
-
-    getLineScores($link, $gamedate, $hometeam, $gamenum, $month, $day, $year);
-
-?>
-
-<h1 class="section-separator">VISITORS - BATTING</h1>
 
 <?php
     getVisitorLineup($link, $gameid, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
@@ -116,157 +18,112 @@
             // clear baserunners if new team batting and assign team LOB
             if($row['CATEGORY'] === 'play') {
 
-                checkEndOfInning($row, $gameState);
+                // checkEndOfInning($row, $gameState);
 
                 // strikeouts
-                if($row['OUTCOME'][0]==='K') {
+                // if($row['OUTCOME'][0] === 'K') {
                     // record strikeout and possible RISP team stat
-                    getStrikeouts($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
+                    // getStrikeouts($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
 
                     // check for WP
-                    if(strpos($row['OUTCOME'], 'WP') !== false) {
-                        getWildPitch($row, $gameState, $visPitcherBoxScoreStats, $homePitcherBoxScoreStats);
-                    }
+                    // if(strpos($row['OUTCOME'], 'WP') !== false) {
+                    //     getWildPitch($row, $gameState, $visPitcherBoxScoreStats, $homePitcherBoxScoreStats);
+                    // }
 
                     // check for PB
-                    if(strpos($row['OUTCOME'], 'PB') !== false) {
-                        getPassedBall($row, $gameState, $visPitcherBoxScoreStats, $homePitcherBoxScoreStats);
-                    }
+                    // if(strpos($row['OUTCOME'], 'PB') !== false) {
+                    //     getPassedBall($row, $gameState, $visPitcherBoxScoreStats, $homePitcherBoxScoreStats);
+                    // }
 
                     // check SB
-                    if(strpos($row['OUTCOME'], 'SB') !== false) {
-                        getStolenBase($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
-                    }
+                    // if(strpos($row['OUTCOME'], 'SB') !== false) {
+                    //     getStolenBase($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
+                    // }
 
                     // check CS
-                    if(strpos($row['OUTCOME'], 'CS') !== false) {
-                        getCaughtStealing($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
+                    // if(strpos($row['OUTCOME'], 'CS') !== false) {
+                    //     getCaughtStealing($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
 
                         // this counts as a double play
-                        setDoublePlay($row['TEAMATBAT'], $gameState);
-                    }
+                    //     setDoublePlay($row['TEAMATBAT'], $gameState);
+                    // }
 
                     // check errors
-                    if(strpos($row['OUTCOME'], 'E') !== false) {
-                        getErrors($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats, $visPitcherBoxScoreStats, $homePitcherBoxScoreStats);
-                    }
+                    // if(strpos($row['OUTCOME'], 'E') !== false) {
+                    //     getErrors($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats, $visPitcherBoxScoreStats, $homePitcherBoxScoreStats);
+                    // }
 
                     // check pickoffs
-                    if(strpos($row['OUTCOME'], 'PO') !== false) {
-                        getPickoff($row, $gameState, $visPitcherBoxScoreStats, $homePitcherBoxScoreStats);
-                    }
+                    // if(strpos($row['OUTCOME'], 'PO') !== false) {
+                    //     getPickoff($row, $gameState, $visPitcherBoxScoreStats, $homePitcherBoxScoreStats);
+                    // }
 
                     // check double play
-                    if(strpos($row['OUTCOME'], 'DP') !== false) {
-                        // check for NO DOUBLE PLAY RECORDED
-                        if(strpos($row['OUTCOME'], 'NDP') == false) {
-                            // double play
-                            if($row['TEAMATBAT'] === '0') {
-                                $gameState->home_double_plays_turned++;
-                            }
-                            else {
-                                $gameState->vis_double_plays_turned++;
-                            }
-                        }
-                    }
+                    // if(strpos($row['OUTCOME'], 'DP') !== false) {
+                    //     // check for NO DOUBLE PLAY RECORDED
+                    //     if(strpos($row['OUTCOME'], 'NDP') == false) {
+                    //         // double play
+                    //         if($row['TEAMATBAT'] === '0') {
+                    //             $gameState->home_double_plays_turned++;
+                    //         }
+                    //         else {
+                    //             $gameState->vis_double_plays_turned++;
+                    //         }
+                    //     }
+                    // }
 
                     // move base runners
-                    moveBaseRunners($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
+                    // moveBaseRunners($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
 
                 }
 
                 // walks, not wild pitches
-                else if($row['OUTCOME'][0]==='W' && $row['OUTCOME'][1] !== 'P') {
-                    getWalks($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
+                // else if($row['OUTCOME'][0]==='W' && $row['OUTCOME'][1] !== 'P') {
+                //     getWalks($row, 'W', $gameState, $visBoxScoreStats, $homeBoxScoreStats);
+                //     $outcome = 'Walk';
+                // }
 
-                    // check for WP
-                    if(strpos($row['OUTCOME'], 'WP') !== false) {
-                        getWildPitch($row, $gameState, $visPitcherBoxScoreStats, $homePitcherBoxScoreStats);
-                    }
-
-                    // check for PB
-                    if(strpos($row['OUTCOME'], 'PB') !== false) {
-                        getPassedBall($row, $gameState, $visPitcherBoxScoreStats, $homePitcherBoxScoreStats);
-                    }
-
-                    // check SB
-                    if(strpos($row['OUTCOME'], 'SB') !== false) {
-                        getStolenBase($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
-                    }
-
-                    // move base runners
-                    moveBaseRunners($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
-                }
-
-                // Intentional Walk
-                else if(strpos($row['OUTCOME'], 'IW') !== false) {
-                    getWalks($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
-
-                    // move base runners
-                    moveBaseRunners($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
-                }
-
-                // hit by pitch
-                else if(strpos($row['OUTCOME'], 'HP') !== false) {
-                    getHitByPitch($row, $visBoxScoreStats, $homeBoxScoreStats);
-
-                    moveBaseRunners($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
-                }
+                // intentional walks
+                // else if(strpos($row['OUTCOME'], 'IW') !== false) {
+                //     getWalks($row, 'IW', $gameState, $visBoxScoreStats, $homeBoxScoreStats);
+                //     $outcome = 'Intentional Walk';
+                // }
 
                 // singles, not stolen bases
-                else if($row['OUTCOME'][0]==='S' && $row['OUTCOME'][1] !== 'B') {
-                    getSingles($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
-
-                    // check errors
-                    if(strpos($row['OUTCOME'], 'E') !== false) {
-                        getErrors($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats, $visPitcherBoxScoreStats, $homePitcherBoxScoreStats);
-                    }
-
-                    moveBaseRunners($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
-                }
+                // else if($row['OUTCOME'][0]==='S' and $row['OUTCOME'][1] !== 'B') {
+                //     getSingles($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
+                //     $outcome = 'Single';
+                // }
 
                 // // doubles, not defensive interference
-                else if($row['OUTCOME'][0]==='D' && $row['OUTCOME'][1] !== 'I') {
-                    getDoubles($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
-
-                    // check errors
-                    if(strpos($row['OUTCOME'], 'E') !== false) {
-                        getErrors($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats, $visPitcherBoxScoreStats, $homePitcherBoxScoreStats);
-                    }
-
-                    moveBaseRunners($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
-                }
+                // else if($row['OUTCOME'][0]==='D' and $row['OUTCOME'][1] !== 'I') {
+                //     getDoubles($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
+                //     $outcome = 'Double';
+                // }
 
                 // // triples
-                else if($row['OUTCOME'][0]==='T') {
-                    getTriples($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
-                    
-                    // check errors
-                    if(strpos($row['OUTCOME'], 'E') !== false) {
-                        getErrors($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats, $visPitcherBoxScoreStats, $homePitcherBoxScoreStats);
-                    }
-
-                    moveBaseRunners($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
-                }
+                // else if($row['OUTCOME'][0]==='T') {
+                //     getTriples($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
+                //     $outcome = 'Triple';
+                // }
 
                 // // homeruns
-                else if(strpos($row['OUTCOME'], 'HR') !== false) {
-                    getHomeRuns($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
-                    
-                    // check errors
-                    if(strpos($row['OUTCOME'], 'E') !== false) {
-                        getErrors($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats, $visPitcherBoxScoreStats, $homePitcherBoxScoreStats);
-                    }
+                // else if(strpos($row['OUTCOME'], 'HR') !== false) {
+                //     getHomeRuns($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
+                //     $outcome = 'Homerun';
+                // }
 
-                    moveBaseRunners($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
-                }
+                // // hit by pitch
+                // else if(strpos($row['OUTCOME'], 'HP') !== false) {
+                //     getHitByPitch($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
+                //     $outcome = 'HBP';
+                // }
 
                 // // balk
-                else if(strpos($row['OUTCOME'], 'BK') !== false) {
-                    getBalk($row, $gameState, $visPitcherBoxScoreStats, $homePitcherBoxScoreStats);
-
-                    moveBaseRunners($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
-                }
+                // else if(strpos($row['OUTCOME'], 'BK') !== false) {
+                //     getBalk($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats, $visPitcherBoxScoreStats, $homePitcherBoxScoreStats);
+                //     $outcome = 'Balk';
+                // }
 
                 // // POPUPS, NOT ERRORS
                 // else if($row['OUTCOME'][0] === '1' || $row['OUTCOME'][0] === '2' || $row['OUTCOME'][0] === '3' || $row['OUTCOME'][0] === '4' || $row['OUTCOME'][0] === '5' || $row['OUTCOME'][0] === '6' || $row['OUTCOME'][0] === '7' || $row['OUTCOME'][0] === '8' || $row['OUTCOME'][0] === '9' || strpos($row['OUTCOME'], 'FC') !== false) {
