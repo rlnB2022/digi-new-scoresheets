@@ -701,6 +701,8 @@ function moveBaseRunners($row, &$gameState, &$visBoxScoreStats, &$homeBoxScoreSt
 
 function getSingles($row, &$gameState, &$visBoxScoreStats, &$homeBoxScoreStats) {
 
+    $error_on_single = false;
+
     $teamatbat = $row['TEAMATBAT'] === '0' ? $visBoxScoreStats : $homeBoxScoreStats;
 
     // record a single and at-bat for batter
@@ -720,18 +722,63 @@ function getSingles($row, &$gameState, &$visBoxScoreStats, &$homeBoxScoreStats) 
     // check errors
     if(strpos($row['OUTCOME'], 'E') !== false) {
         getErrors($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats, $visPitcherBoxScoreStats, $homePitcherBoxScoreStats);
+        $error_on_single = true;
     }
 
     moveBaseRunners($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
 
     // if runner gets thrown out at 1st after everything is resolved
     if(strpos($row['OUTCOME'], 'BX1') !== false) {
-        $gameState->runneron1st = 'None';
+        // if error is found after BX1, then he's safe at 1st
+        if($error_on_single) {
+            $error_loc = strpos($row['OUTCOME', 'E']);
+            $bx_loc = strpos($row['OUTCOME', 'BX']);
+
+            if($error_loc > $bx_loc) {
+                // runner is safe at 1st
+                $gameState->runneron1st = $row['PLAYERID'];
+            }
+        }
+        else {
+            $gameState->outs_in_the_inning++;
+        }
+    }
+    else if(strpos($row['OUTCOME'], 'BX2') !== false) {
+        // if error is found after BX2, then he's safe at 1st
+        if($error_on_single) {
+            $error_loc = strpos($row['OUTCOME', 'E']);
+            $bx_loc = strpos($row['OUTCOME', 'BX']);
+
+            if($error_loc > $bx_loc) {
+                // runner is safe at 2nd
+                $gameState->runneron2nd = $row['PLAYERID'];
+            }
+        }
+        else {
+            $gameState->outs_in_the_inning++;
+        }
+    }
+    else if(strpos($row['OUTCOME'], 'BX3') !== false) {
+        // if error is found after BX3 then he's safe at 1st
+        if($error_on_single) {
+            $error_loc = strpos($row['OUTCOME', 'E']);
+            $bx_loc = strpos($row['OUTCOME', 'BX']);
+
+            if($error_loc > $bx_loc) {
+                // runner is safe at 3rd
+                $gameState->runneron3rd = $row['PLAYERID'];
+            }
+        }
+        else {
+            $gameState->outs_in_the_inning++;
+        }
     }
 
 }
 
 function getDoubles($row, &$gameState, &$visBoxScoreStats, &$homeBoxScoreStats) {
+
+    $error_on_double = false;
 
     $teamatbat = $row['TEAMATBAT'] === '0' ? $visBoxScoreStats : $homeBoxScoreStats;
 
@@ -747,6 +794,45 @@ function getDoubles($row, &$gameState, &$visBoxScoreStats, &$homeBoxScoreStats) 
     if(isRISP($gameState)) {
         addRISP_AB($row['TEAMATBAT'], $gameState);
         addRISP_H($row['TEAMATBAT'], $gameState);
+    }
+
+    // check errors
+    if(strpos($row['OUTCOME'], 'E') !== false) {
+        getErrors($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats, $visPitcherBoxScoreStats, $homePitcherBoxScoreStats);
+        $error_on_double = true;
+    }
+
+    moveBaseRunners($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
+
+    if(strpos($row['OUTCOME'], 'BX2') !== false) {
+        // if error is found after BX2, then he's safe at 1st
+        if($error_on_double) {
+            $error_loc = strpos($row['OUTCOME', 'E']);
+            $bx_loc = strpos($row['OUTCOME', 'BX']);
+
+            if($error_loc > $bx_loc) {
+                // runner is safe at 2nd
+                $gameState->runneron2nd = $row['PLAYERID'];
+            }
+        }
+        else {
+            $gameState->outs_in_the_inning++;
+        }
+    }
+    else if(strpos($row['OUTCOME'], 'BX3') !== false) {
+        // if error is found after BX3 then he's safe at 1st
+        if($error_on_double) {
+            $error_loc = strpos($row['OUTCOME', 'E']);
+            $bx_loc = strpos($row['OUTCOME', 'BX']);
+
+            if($error_loc > $bx_loc) {
+                // runner is safe at 3rd
+                $gameState->runneron3rd = $row['PLAYERID'];
+            }
+        }
+        else {
+            $gameState->outs_in_the_inning++;
+        }
     }
 
 }
