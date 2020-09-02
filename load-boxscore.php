@@ -44,11 +44,16 @@
         public $outs_in_the_inning = 0;
         public $teamatbat = 0;
 
+        public $outs_this_row = 0;
+
         public $visTeamLOB = 0;
         public $homeTeamLOB = 0;
 
         public $visTeamGDP = 0;
         public $homeTeamGDP = 0;
+
+        public $visTeamGTP = 0;
+        public $homeTeamGTP = 0;
 
         public $visTeamPickoffs = 0;
         public $homeTeamPickoffs = 0;
@@ -75,6 +80,9 @@
 
         public $vis_double_plays_turned = 0;
         public $home_double_plays_turned = 0;
+
+        public $vis_triple_plays_turned = 0;
+        public $home_triple_plays_turned = 0;
 
         public $runneron1st = 'None';
         public $runneron2nd = 'None';
@@ -118,6 +126,8 @@
 
                 checkEndOfInning($row, $gameState);
 
+                $gameState->outs_this_row = 0;
+
                 // strikeouts
                 if($row['OUTCOME'][0]==='K') {
                     // record strikeout and possible RISP team stat
@@ -156,22 +166,13 @@
                         getPickoff($row, $gameState, $visPitcherBoxScoreStats, $homePitcherBoxScoreStats);
                     }
 
-                    // check double play
-                    if(strpos($row['OUTCOME'], 'DP') !== false) {
-                        // check for NO DOUBLE PLAY RECORDED
-                        if(strpos($row['OUTCOME'], 'NDP') == false) {
-                            // double play
-                            if($row['TEAMATBAT'] === '0') {
-                                $gameState->home_double_plays_turned++;
-                            }
-                            else {
-                                $gameState->vis_double_plays_turned++;
-                            }
-                        }
-                    }
-
                     // move base runners
                     moveBaseRunners($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
+
+                    // double play?
+                    if($gameState->outs_this_row === 2) {
+                        setDoublePlay($row['TEAMATBAT'], $gameState);
+                    }
 
                 }
 
@@ -194,8 +195,42 @@
                         getStolenBase($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
                     }
 
+                    // check errors
+                    if(strpos($row['OUTCOME'], 'E') !== false) {
+                        getErrors($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats, $visPitcherBoxScoreStats, $homePitcherBoxScoreStats);
+                    }
+
                     // move base runners
                     moveBaseRunners($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
+
+                    if(strpos($row['OUTCOME'], 'B-H') !== false) {
+                        foreach($visBoxScoreStats as $vs) {
+                            if($vs->playerid === $row['PLAYERID']) {
+                                $vs->batter_stat_r++;
+                            break;
+                            }
+                        }
+                        
+                    }
+                    else if(strpos($row['OUTCOME'], 'B-3') !== false) {
+                        $gameState->runneron3rd = $row['PLAYERID'];
+                    }
+                    else if(strpos($row['OUTCOME'], 'B-2') !== false) {
+                        $gameState->runneron2nd = $row['PLAYERID'];
+                    }
+                    else {
+                        $gameState->runneron1st = $row['PLAYERID'];
+                    }
+
+                    // RBI for bases-loaded
+                    if(strpos($row['OUTCOME'], '3-H') !== false) {
+                        foreach($visBoxScoreStats as $vs) {
+                            if($vs->playerid === $row['PLAYERID']) {
+                                $vs->batter_stat_rbi++;
+                            break;
+                            }
+                        }
+                    }
                 }
 
                 // Intentional Walk
@@ -204,6 +239,7 @@
 
                     // move base runners
                     moveBaseRunners($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
+
                 }
 
                 // hit by pitch
@@ -216,13 +252,6 @@
                 // singles, not stolen bases
                 else if($row['OUTCOME'][0]==='S' && $row['OUTCOME'][1] !== 'B') {
                     getSingles($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
-
-                    // check errors
-                    if(strpos($row['OUTCOME'], 'E') !== false) {
-                        getErrors($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats, $visPitcherBoxScoreStats, $homePitcherBoxScoreStats);
-                    }
-
-                    moveBaseRunners($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
                 }
 
                 // // doubles, not defensive interference
@@ -268,10 +297,23 @@
                     moveBaseRunners($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
                 }
 
+                else if(strpos($row['OUTCOME'], 'GDP') !== false) {
+                    getGDP($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
+                    
+                    moveBaseRunners($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
+                }
+
+                else if(strpos($row['OUTCOME'], 'GTP') !== false) {
+                    getGTP($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
+                }
+
+                else if(strpos($row['OUTCOME'], 'FO') !== false) {
+                    getFO($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
+                }
+
                 // // POPUPS, NOT ERRORS
                 // else if($row['OUTCOME'][0] === '1' || $row['OUTCOME'][0] === '2' || $row['OUTCOME'][0] === '3' || $row['OUTCOME'][0] === '4' || $row['OUTCOME'][0] === '5' || $row['OUTCOME'][0] === '6' || $row['OUTCOME'][0] === '7' || $row['OUTCOME'][0] === '8' || $row['OUTCOME'][0] === '9' || strpos($row['OUTCOME'], 'FC') !== false) {
                 //     getOut($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
-                //     $outcome = 'Out';
                 // }
 
                 // // wild pitch
@@ -298,11 +340,6 @@
                 //     $outcome = 'Error';
                 // }
 
-                // // get GIDP
-                // if(strpos($row['OUTCOME'], 'GDP') !== false) {
-                //     getGDP($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
-                // }
-
                 // // check RBI
                 // checkRBI($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
 
@@ -311,6 +348,7 @@
 
                 // // check for SUB
                 // checkForSub($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
+
             }
         }
     }
