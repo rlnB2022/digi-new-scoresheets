@@ -404,6 +404,7 @@ function getWalks($row, &$gameState, &$visBoxScoreStats, &$homeBoxScoreStats) {
         break;
         }
     }
+    
 }
 
 function getHitByPitch($row, &$visBoxScoreStats, &$homeBoxScoreStats) {
@@ -588,14 +589,31 @@ function getCaughtStealing($row, &$gameState, &$visBoxScoreStats, &$homeBoxScore
 
 }
 
-function moveBaseRunners($row, &$gameState, &$visBoxScoreStats, &$homeBoxScoreStats) {
+function moveBaseRunners($row, $runnerData, &$gameState, &$visBoxScoreStats, &$homeBoxScoreStats) {
 
     $teamatbat = $row['TEAMATBAT'] === '0' ? $visBoxScoreStats : $homeBoxScoreStats;
 
     // runner out at Home
-    if(strpos($row['OUTCOME'], '3XH')) {
-        $gameState->runneron3rd = 'None';
-        $gameState->outs_in_the_inning++;
+    if(strpos($runnerData, '3XH') !== false) {
+        // check for error on play - runner safe at home, if so
+        if(strpos($runnerData, 'E') !== false) {
+            foreach($teamatbat as $vs) {
+                if($vs->playerid === $gameState->runneron3rd) {
+                    $vs->batter_stat_r++;
+                    $gameState->runneron3rd = 'None';
+                break;
+                }
+            }
+
+            if(strpos($runnerData, 'E') !== false) {
+                getErrors($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats, $visPitcherBoxScoreStats, $homePitcherBoxScoreStats);
+            }
+        }
+        else {
+            $gameState->runneron3rd = 'None';
+            $gameState->outs_in_the_inning++;
+        }
+
     }
 
     // runner out at 3rd
@@ -701,8 +719,6 @@ function moveBaseRunners($row, &$gameState, &$visBoxScoreStats, &$homeBoxScoreSt
 
 function getSingles($row, &$gameState, &$visBoxScoreStats, &$homeBoxScoreStats) {
 
-    $error_on_single = false;
-
     $teamatbat = $row['TEAMATBAT'] === '0' ? $visBoxScoreStats : $homeBoxScoreStats;
 
     // record a single and at-bat for batter
@@ -717,61 +733,6 @@ function getSingles($row, &$gameState, &$visBoxScoreStats, &$homeBoxScoreStats) 
     if(isRISP($gameState)) {
         addRISP_AB($row['TEAMATBAT'], $gameState);
         addRISP_H($row['TEAMATBAT'], $gameState);
-    }
-
-    // check errors
-    if(strpos($row['OUTCOME'], 'E') !== false) {
-        getErrors($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats, $visPitcherBoxScoreStats, $homePitcherBoxScoreStats);
-        $error_on_single = true;
-    }
-
-    moveBaseRunners($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
-
-    // if runner gets thrown out at 1st after everything is resolved
-    if(strpos($row['OUTCOME'], 'BX1') !== false) {
-        // if error is found after BX1, then he's safe at 1st
-        if($error_on_single) {
-            $error_loc = strpos($row['OUTCOME', 'E']);
-            $bx_loc = strpos($row['OUTCOME', 'BX']);
-
-            if($error_loc > $bx_loc) {
-                // runner is safe at 1st
-                $gameState->runneron1st = $row['PLAYERID'];
-            }
-        }
-        else {
-            $gameState->outs_in_the_inning++;
-        }
-    }
-    else if(strpos($row['OUTCOME'], 'BX2') !== false) {
-        // if error is found after BX2, then he's safe at 1st
-        if($error_on_single) {
-            $error_loc = strpos($row['OUTCOME', 'E']);
-            $bx_loc = strpos($row['OUTCOME', 'BX']);
-
-            if($error_loc > $bx_loc) {
-                // runner is safe at 2nd
-                $gameState->runneron2nd = $row['PLAYERID'];
-            }
-        }
-        else {
-            $gameState->outs_in_the_inning++;
-        }
-    }
-    else if(strpos($row['OUTCOME'], 'BX3') !== false) {
-        // if error is found after BX3 then he's safe at 1st
-        if($error_on_single) {
-            $error_loc = strpos($row['OUTCOME', 'E']);
-            $bx_loc = strpos($row['OUTCOME', 'BX']);
-
-            if($error_loc > $bx_loc) {
-                // runner is safe at 3rd
-                $gameState->runneron3rd = $row['PLAYERID'];
-            }
-        }
-        else {
-            $gameState->outs_in_the_inning++;
-        }
     }
 
 }
@@ -807,8 +768,8 @@ function getDoubles($row, &$gameState, &$visBoxScoreStats, &$homeBoxScoreStats) 
     if(strpos($row['OUTCOME'], 'BX2') !== false) {
         // if error is found after BX2, then he's safe at 1st
         if($error_on_double) {
-            $error_loc = strpos($row['OUTCOME', 'E']);
-            $bx_loc = strpos($row['OUTCOME', 'BX']);
+            $error_loc = strpos($row['OUTCOME'], 'E');
+            $bx_loc = strpos($row['OUTCOME'], 'BX');
 
             if($error_loc > $bx_loc) {
                 // runner is safe at 2nd
@@ -822,8 +783,8 @@ function getDoubles($row, &$gameState, &$visBoxScoreStats, &$homeBoxScoreStats) 
     else if(strpos($row['OUTCOME'], 'BX3') !== false) {
         // if error is found after BX3 then he's safe at 1st
         if($error_on_double) {
-            $error_loc = strpos($row['OUTCOME', 'E']);
-            $bx_loc = strpos($row['OUTCOME', 'BX']);
+            $error_loc = strpos($row['OUTCOME'], 'E');
+            $bx_loc = strpos($row['OUTCOME'], 'BX');
 
             if($error_loc > $bx_loc) {
                 // runner is safe at 3rd
@@ -839,6 +800,8 @@ function getDoubles($row, &$gameState, &$visBoxScoreStats, &$homeBoxScoreStats) 
 
 function getTriples($row, &$gameState, &$visBoxScoreStats, &$homeBoxScoreStats) {
 
+    $error_on_triple = false;
+
     $teamatbat = $row['TEAMATBAT'] === '0' ? $visBoxScoreStats : $homeBoxScoreStats;
 
     // record a single and at-bat for batter
@@ -853,6 +816,30 @@ function getTriples($row, &$gameState, &$visBoxScoreStats, &$homeBoxScoreStats) 
     if(isRISP($gameState)) {
         addRISP_AB($row['TEAMATBAT'], $gameState);
         addRISP_H($row['TEAMATBAT'], $gameState);
+    }
+
+    // check errors
+    if(strpos($row['OUTCOME'], 'E') !== false) {
+        getErrors($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats, $visPitcherBoxScoreStats, $homePitcherBoxScoreStats);
+        $error_on_triple = true;
+    }
+
+    moveBaseRunners($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
+
+    if(strpos($row['OUTCOME'], 'BX3') !== false) {
+        // if error is found after BX3 then he's safe at 1st
+        if($error_on_triple) {
+            $error_loc = strpos($row['OUTCOME'], 'E');
+            $bx_loc = strpos($row['OUTCOME'], 'BX');
+
+            if($error_loc > $bx_loc) {
+                // runner is safe at 3rd
+                $gameState->runneron3rd = $row['PLAYERID'];
+            }
+        }
+        else {
+            $gameState->outs_in_the_inning++;
+        }
     }
 }
 
@@ -879,6 +866,13 @@ function getHomeruns($row, &$gameState, &$visBoxScoreStats, &$homeBoxScoreStats)
         addRISP_AB($row['TEAMATBAT'], $gameState);
         addRISP_H($row['TEAMATBAT'], $gameState);
     }
+
+    // check errors
+    if(strpos($row['OUTCOME'], 'E') !== false) {
+        getErrors($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats, $visPitcherBoxScoreStats, $homePitcherBoxScoreStats);
+    }
+
+    moveBaseRunners($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
 
 }
 
@@ -920,6 +914,8 @@ function getBalk($row, &$gameState, &$visPitcherBoxScoreStats, &$homePitcherBoxS
             $vs->pitcher_stat_bk++;
         }
     }
+
+    moveBaseRunners($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
 
 }
 
@@ -1269,6 +1265,10 @@ function getGTP($row, &$gameState, &$visBoxScoreStats, &$homeBoxScoreStats) {
             }
         }
     }
+}
+
+function getFC($row, &$gameState, &$visBoxScoreStats, &$homeBoxScoreStats) {
+
 }
 
 function getFO($row, &$gameState, &$visBoxScoreStats, &$homeBoxScoreStats) {
