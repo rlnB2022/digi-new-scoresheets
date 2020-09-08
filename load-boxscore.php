@@ -646,7 +646,7 @@
 
                 // // triples
                 else if($batterData[0]==='T') {
-                    getTriples($tab, $playerid, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
+                    getTriples($row['TEAMATBAT'], $row['PLAYERID'], $gameState, $visBoxScoreStats, $homeBoxScoreStats);
 
                     // move base runners
                     foreach($runnerData as $rd) {
@@ -902,7 +902,7 @@
         }
         // triples
         if($total_triples > 0) {
-            echo '3B: ';
+            echo '<br>3B: ';
             $found = false;
             foreach($visBoxScoreStats as $vs) {
                 if($vs->batter_stat_3b > 0) {
@@ -925,8 +925,7 @@
 
         // homeruns
         if($total_homeruns > 0) {
-            echo '<br>';
-            echo 'HR: ';
+            echo '<br>HR: ';
             $found = false;
             foreach($visBoxScoreStats as $vs) {
                 if($vs->batter_stat_hr > 0) {
@@ -958,8 +957,7 @@
                 }
 
                 if(!$found) {
-                    echo '<br>';
-                    echo 'IBB: ';
+                    echo '<br>IBB: ';
                 }
 
                 echo getPlayerName($link, $vs->playerid);
@@ -975,8 +973,7 @@
 
         // sac flies
         if($total_sacflies > 0) {
-            echo '<br>';
-            echo 'SF: ';
+            echo '<br>SF: ';
             $found = false;
 
             foreach($visBoxScoreStats as $vs) {
@@ -999,8 +996,7 @@
 
         // sac hits
         if($total_sachits > 0) {
-            echo '<br>';
-            echo 'SH: ';
+            echo '<br>SH: ';
             $found = false;
             foreach($visBoxScoreStats as $vs) {
                 if($vs->batter_stat_sh > 0) {
@@ -1023,8 +1019,7 @@
 
         // hbp
         if($total_hbp > 0) {
-            echo '<br>';
-            echo 'HBP: ';
+            echo '<br>HBP: ';
             $found = false;
             foreach($visBoxScoreStats as $vs) {
                 if($vs->batter_stat_hbp > 0) {
@@ -1046,8 +1041,7 @@
 
         // total bases
         if($team_total_bases > 0) {
-            echo '<br>';
-            echo 'TB: ';
+            echo '<br>TB: ';
 
             usort($total_bases, function($first, $second) {
                 return $first->bases < $second->bases;
@@ -1072,8 +1066,7 @@
 
         // GDP
         if($gameState->visTeamGDP > 0) {
-            echo '<br>';
-            echo 'GIDP: ';
+            echo '<br>GIDP: ';
             foreach($visBoxScoreStats as $vs) {
                 if($vs->batter_stat_gidp > 0) {
                     if($foundGIDP) {
@@ -1094,8 +1087,7 @@
 
         // total rbi
         if($team_total_rbi > 0) {
-            echo '<br>';
-            echo 'RBI: ';
+            echo '<br>RBI: ';
 
             usort($total_rbi, function($first, $second) {
                 return $first->rbi < $second->rbi;
@@ -1120,8 +1112,7 @@
 
         // total 2-out rbi
         if($team_total_rbi_2_out > 0) {
-            echo '<br>';
-            echo '2-out RBI: ';
+            echo '<br>2-out RBI: ';
 
             usort($team_2_out, function($first, $second) {
                 return $first->rbi < $second->rbi;
@@ -1148,13 +1139,11 @@
         }
 
         // Team LOB
-        echo '<br>';
-        echo 'Team LOB: ' . $gameState->visTeamLOB;
+        echo '<br>Team LOB: ' . $gameState->visTeamLOB;
 
         // Runners in scoring position hits per at-bat
         if($gameState->risp_vis_ab > 0) {
-            echo '<br>';
-            echo 'With RISP: ' . $gameState->risp_vis_h . ' for ' . $gameState->risp_vis_ab . '.';
+            echo '<br>With RISP: ' . $gameState->risp_vis_h . ' for ' . $gameState->risp_vis_ab . '.';
         }
 
         echo '<br>Fielding:';
