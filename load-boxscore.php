@@ -94,6 +94,70 @@
             $this->runneron3rd = 'None';
         }
     }
+    class Pitches {
+        public $count0_0_ball;
+        public $count0_0_called_strike;
+        public $count0_0_foul;
+        public $count0_0_ball_in_play;
+        public $count0_0_swinging_strike;
+        public $count1_0_ball;
+        public $count1_0_called_strike;
+        public $count1_0_foul;
+        public $count1_0_ball_in_play;
+        public $count1_0_swinging_strike;
+        public $count2_0_ball;
+        public $count2_0_called_strike;
+        public $count2_0_foul;
+        public $count2_0_ball_in_play;
+        public $count2_0_swinging_strike;
+        public $count3_0_ball;
+        public $count3_0_called_strike;
+        public $count3_0_foul;
+        public $count3_0_ball_in_play;
+        public $count3_0_swinging_strike;
+        public $count0_1_ball;
+        public $count0_1_called_strike;
+        public $count0_1_foul;
+        public $count0_1_ball_in_play;
+        public $count0_1_swinging_strike;
+        public $count1_1_ball;
+        public $count1_1_called_strike;
+        public $count1_1_foul;
+        public $count1_1_ball_in_play;
+        public $count1_1_swinging_strike;
+        public $count2_1_ball;
+        public $count2_1_called_strike;
+        public $count2_1_foul;
+        public $count2_1_ball_in_play;
+        public $count2_1_swinging_strike;
+        public $count3_1_ball;
+        public $count3_1_called_strike;
+        public $count3_1_foul;
+        public $count3_1_ball_in_play;
+        public $count3_1_swinging_strike;
+        public $count0_2_ball;
+        public $count0_2_called_strike;
+        public $count0_2_foul;
+        public $count0_2_ball_in_play;
+        public $count0_2_swinging_strike;
+        public $count1_2_ball;
+        public $count1_2_called_strike;
+        public $count1_2_foul;
+        public $count1_2_ball_in_play;
+        public $count1_2_swinging_strike;
+        public $count2_2_ball;
+        public $count2_2_called_strike;
+        public $count2_2_foul;
+        public $count2_2_ball_in_play;
+        public $count2_2_swinging_strike;
+        public $count3_2_ball;
+        public $count3_2_called_strike;
+        public $count3_2_foul;
+        public $count3_2_ball_in_play;
+        public $count3_2_swinging_strike;
+    }
+
+    $pitches = new Pitches();
 
     $gameState = new GameStatus();
     $gameState->visDefense = new Defense();
@@ -112,6 +176,159 @@
 
 <div class="boxscore-stats">
   <?php
+
+  // ******************** TESTING CODE - REMOVE WHEN FINISHED ******************
+
+//   $sql = "SELECT * FROM EVENTS where PLAYERID='troum001'";
+
+//   $result = mysqli_query($link, $sql);
+
+//   $resultCheck = mysqli_num_rows($result);
+
+//     if($resultCheck > 0) {
+//         while ($row = mysqli_fetch_assoc($result)) {
+//             if($row['CATEGORY'] === 'play') {
+
+//                 $current_balls = 0;
+//                 $current_strikes = 0;
+//                 $current_pitches = $row['PITCHES'];
+//                 $this_result = '';
+//                 $current_count = '';
+
+//                 for($i = 0; $i < strlen($current_pitches); $i++) {
+
+//                     $current_count = 'count' . $current_balls . '_' . $current_strikes;
+
+//                     if($current_pitches[$i] !== '.' || $current_pitches[$i] !== '*' || $current_pitches[$i] !== '>') {
+//                         if($current_pitches[$i] === 'B') {
+//                             $current_balls++;
+//                             $this_result = 'ball';
+//                         }
+//                         else if($current_pitches[$i] === 'C') {
+//                             $current_strikes++;
+//                             $this_result = 'called_strike';
+//                         }
+//                         else if($current_pitches[$i] === 'S' || $current_pitches[$i] === 'T') {
+//                             $current_strikes++;
+//                             $this_result = 'swinging_strike';
+//                         }
+//                         else if($current_pitches[$i] === 'F') {
+//                             if($current_strikes < 2) {
+//                                 $current_strikes++;
+//                                 $this_result = 'foul';
+//                             }
+//                         }
+//                         else if($current_pitches[$i] === 'X') {
+//                             $this_result = 'ball_in_play';
+//                         }
+//                         else if($current_pitches[$i] === 'H') {
+//                             $this_result = 'HBP';
+//                         }
+
+//                         if($this_result !== 'HBP') {
+//                             $end_result = $current_count . "_" . $this_result;
+
+//                             $pitches->$end_result++;
+//                         }
+//                     }
+//                 }
+//             }
+//         }
+//     }
+
+//     echo '0-0: <br>';
+//     echo $pitches->count0_0_ball . '<br>';
+//     echo $pitches->count0_0_called_strike . '<br>';
+//     echo $pitches->count0_0_foul . '<br>';
+//     echo $pitches->count0_0_ball_in_play . '<br>';
+//     echo $pitches->count0_0_swinging_strike . '<br>';
+
+//     echo '1-0: <br>';
+//     echo $pitches->count1_0_ball . '<br>';
+//     echo $pitches->count1_0_called_strike . '<br>';
+//     echo $pitches->count1_0_foul . '<br>';
+//     echo $pitches->count1_0_ball_in_play . '<br>';
+//     echo $pitches->count1_0_swinging_strike . '<br>';
+
+//     echo '2-0: <br>';
+//     echo $pitches->count2_0_ball . '<br>';
+//     echo $pitches->count2_0_called_strike . '<br>';
+//     echo $pitches->count2_0_foul . '<br>';
+//     echo $pitches->count2_0_ball_in_play . '<br>';
+//     echo $pitches->count2_0_swinging_strike . '<br>';
+
+//     echo '3-0: <br>';
+//     echo $pitches->count3_0_ball . '<br>';
+//     echo $pitches->count3_0_called_strike . '<br>';
+//     echo $pitches->count3_0_foul . '<br>';
+//     echo $pitches->count3_0_ball_in_play . '<br>';
+//     echo $pitches->count3_0_swinging_strike . '<br>';
+
+//     echo '0-1: <br>';
+//     echo $pitches->count0_1_ball . '<br>';
+//     echo $pitches->count0_1_called_strike . '<br>';
+//     echo $pitches->count0_1_foul . '<br>';
+//     echo $pitches->count0_1_ball_in_play . '<br>';
+//     echo $pitches->count0_1_swinging_strike . '<br>';
+
+//     echo '1-1: <br>';
+
+//     echo $pitches->count1_1_ball . '<br>';
+//     echo $pitches->count1_1_called_strike . '<br>';
+//     echo $pitches->count1_1_foul . '<br>';
+//     echo $pitches->count1_1_ball_in_play . '<br>';
+//     echo $pitches->count1_1_swinging_strike . '<br>';
+
+//     echo '2-1: <br>';
+
+//     echo $pitches->count2_1_ball . '<br>';
+//     echo $pitches->count2_1_called_strike . '<br>';
+//     echo $pitches->count2_1_foul . '<br>';
+//     echo $pitches->count2_1_ball_in_play . '<br>';
+//     echo $pitches->count2_1_swinging_strike . '<br>';
+
+//     echo '3-1: <br>';
+
+//     echo $pitches->count3_1_ball . '<br>';
+//     echo $pitches->count3_1_called_strike . '<br>';
+//     echo $pitches->count3_1_foul . '<br>';
+//     echo $pitches->count3_1_ball_in_play . '<br>';
+//     echo $pitches->count3_1_swinging_strike . '<br>';
+
+//     echo '0-2: <br>';
+
+//     echo $pitches->count0_2_ball . '<br>';
+//     echo $pitches->count0_2_called_strike . '<br>';
+//     echo $pitches->count0_2_foul . '<br>';
+//     echo $pitches->count0_2_ball_in_play . '<br>';
+//     echo $pitches->count0_2_swinging_strike . '<br>';
+
+//     echo '1-2: <br>';
+
+//     echo $pitches->count1_2_ball . '<br>';
+//     echo $pitches->count1_2_called_strike . '<br>';
+//     echo $pitches->count1_2_foul . '<br>';
+//     echo $pitches->count1_2_ball_in_play . '<br>';
+//     echo $pitches->count1_2_swinging_strike . '<br>';
+
+//     echo '2-2: <br>';
+
+//     echo $pitches->count2_2_ball . '<br>';
+//     echo $pitches->count2_2_called_strike . '<br>';
+//     echo $pitches->count2_2_foul . '<br>';
+//     echo $pitches->count2_2_ball_in_play . '<br>';
+//     echo $pitches->count2_2_swinging_strike . '<br>';
+
+//     echo '3-2: <br>';
+
+//     echo $pitches->count3_2_ball . '<br>';
+//     echo $pitches->count3_2_called_strike . '<br>';
+//     echo $pitches->count3_2_foul . '<br>';
+//     echo $pitches->count3_2_ball_in_play . '<br>';
+//     echo $pitches->count3_2_swinging_strike . '<br>';
+
+  // **************************************
+
     $sql = "SELECT * FROM EVENTS WHERE GAMEID = '" . $gameid . "'";
 
     $result = mysqli_query($link, $sql);
@@ -180,21 +397,21 @@
                 // strikeouts
                 if($batterData[0] === 'K') {
                     // record strikeout and possible RISP team stat
-                    getStrikeouts($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
+                    getStrikeouts($row['TEAMATBAT'], $row['PLAYERID'], $gameState, $visBoxScoreStats, $homeBoxScoreStats);
 
                     // check for WP
                     if(strpos($row['OUTCOME'], 'WP') !== false) {
-                        getWildPitch($row, $gameState, $visPitcherBoxScoreStats, $homePitcherBoxScoreStats);
+                        getWildPitch($row['TEAMATBAT'], $row['PITCHERID'], $gameState, $visPitcherBoxScoreStats, $homePitcherBoxScoreStats);
                     }
 
                     // check for PB
                     if(strpos($row['OUTCOME'], 'PB') !== false) {
-                        getPassedBall($row, $gameState, $visPitcherBoxScoreStats, $homePitcherBoxScoreStats);
+                        getPassedBall($row['TEAMATBAT'], $row['PITCHERID'], $gameState, $visPitcherBoxScoreStats, $homePitcherBoxScoreStats);
                     }
 
                     // check SB
                     if(strpos($row['OUTCOME'], 'SB') !== false) {
-                        getStolenBase($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
+                        getStolenBase($batterData, $runnerData, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
                     }
 
                     // check CS
@@ -203,14 +420,9 @@
                         $gameState->outs_this_row = 2;
                     }
 
-                    // check errors
-                    // if(strpos($row['OUTCOME'], 'E') !== false) {
-                    //     getErrors($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats, $visPitcherBoxScoreStats, $homePitcherBoxScoreStats);
-                    // }
-
                     // check pickoffs
                     if(strpos($row['OUTCOME'], 'PO') !== false) {
-                        getPickoff($row, $gameState, $visPitcherBoxScoreStats, $homePitcherBoxScoreStats);
+                        getPickoff($row['TEAMATBAT'], $row['PITCHERID'], $batterData, $runnerData, $gameState, $visPitcherBoxScoreStats, $homePitcherBoxScoreStats);
                     }
 
                     // move base runners
@@ -225,7 +437,7 @@
 
                 }
 
-                // walks, not wild pitches
+                // walks
                 else if($batterData[0]==='W' && $batterData[1] !== 'P') {
                     getWalks($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
 
@@ -246,16 +458,13 @@
 
                     // check pickoffs
                     if(strpos($batterData, 'PO') !== false) {
-                        getPickoff($row, $gameState, $visPitcherBoxScoreStats, $homePitcherBoxScoreStats);
-
-                        // check errors
-                        if(strpos($batterData, 'E') !== false) {
-                            getErrors($runnerData, $gameState, $visBoxScoreStats, $homeBoxScoreStats, $visPitcherBoxScoreStats, $homePitcherBoxScoreStats);
-                        }
+                        getPickoff($row['TEAMATBAT'], $row['PITCHERID'], $batterData, $runnerData, $gameState, $visPitcherBoxScoreStats, $homePitcherBoxScoreStats);
                     }
 
                     // move base runners
-                    moveBaseRunners($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
+                    foreach($runnerData as $rd) {
+                        moveBaseRunners($row, $rd, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
+                    }
 
                     if(strpos($runnerData, 'B-H') !== false) {
                         foreach($visBoxScoreStats as $vs) {
@@ -289,9 +498,11 @@
                 // Intentional Walk
                 else if(strpos($batterData, 'IW') !== false) {
                     getWalks($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
-                    
+
                     // move base runners
-                    moveBaseRunners($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
+                    foreach($runnerData as $rd) {
+                        moveBaseRunners($row, $rd, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
+                    }
 
                     // move runner to 1st
                     $gameState->runneron1st = $row['PLAYERID'];
@@ -302,102 +513,223 @@
                     getHitByPitch($row, $visBoxScoreStats, $homeBoxScoreStats);
 
                     // move base runners
-                    moveBaseRunners($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
+                    foreach($runnerData as $rd) {
+                        moveBaseRunners($row, $rd, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
+                    }
 
                     // move runner to 1st
                     $gameState->runneron1st = $row['PLAYERID'];
                 }
 
-                // singles, not stolen bases
+                // SINGLES, not stolen bases
                 else if($batterData[0]==='S' && $batterData[1] !== 'B') {
-                    getSingles($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
+                    getSingles($row['TEAMATBAT'], $row['PLAYERID'], $gameState, $visBoxScoreStats, $homeBoxScoreStats);
 
                     // move base runners
-                    moveBaseRunners($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
+                    foreach($runnerData as $rd) {
+                        moveBaseRunners($row, $rd, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
+                    }
 
-                    // does runner get thrown out at 1st?
-                    if(strpos($runnerData, 'BX1') !== false) {
-                        // if error is found after BX1, then he's safe at 1st
-                        if(strpos($runnerData, 'E') !== false) {
-                            $error_loc = strpos($runnerData, 'E');
-                            $bx_loc = strpos($runnerData, 'BX');
+                    if(strpos($row['OUTCOME'], 'BX') !== false) {
+                        foreach($runnerData as $rd) {
+                            if(strpos($rd, 'BX1') !== false) {
+                                // if error is found, then he's safe at 1st
+                                if(strpos($rd, 'E') !== false) {
+                                    getErrors($row, $runnerData, $gameState, $visBoxScoreStats, $homeBoxScoreStats, $visPitcherBoxScoreStats, $homePitcherBoxScoreStats);
 
-                            if($error_loc > $bx_loc) {
-                                // runner is safe at 1st
-                                $gameState->runneron1st = $row['PLAYERID'];
+                                    $gameState->runneron1st = $row['PLAYERID'];
+                                }
+                                else {
+                                    $gameState->outs_in_the_inning++;
+                                }
                             }
-                        }
-                        else {
-                            $gameState->outs_in_the_inning++;
+                            else if(strpos($rd, 'BX2') !== false) {
+                                // if error is found, then he's safe at 2nd
+                                if(strpos($rd, 'E') !== false) {
+                                    getErrors($row, $runnerData, $gameState, $visBoxScoreStats, $homeBoxScoreStats, $visPitcherBoxScoreStats, $homePitcherBoxScoreStats);
+
+                                    $gameState->runneron2nd = $row['PLAYERID'];
+                                }
+                                else {
+                                    $gameState->outs_in_the_inning++;
+                                }
+                            }
+                            else if(strpos($rd, 'BX3') !== false) {
+                                // if error is found, then he's safe at 3rd
+                                if(strpos($rd, 'E') !== false) {
+                                    getErrors($row, $runnerData, $gameState, $visBoxScoreStats, $homeBoxScoreStats, $visPitcherBoxScoreStats, $homePitcherBoxScoreStats);
+
+                                    $gameState->runneron3rd = $row['PLAYERID'];
+                                }
+                                else {
+                                    $gameState->outs_in_the_inning++;
+                                }
+                            }
+                            else if(strpos($rd, 'BXH') !== false) {
+                                // if error is found, then he's safe at 2nd
+                                if(strpos($rd, 'E') !== false) {
+                                    getErrors($row, $runnerData, $gameState, $visBoxScoreStats, $homeBoxScoreStats, $visPitcherBoxScoreStats, $homePitcherBoxScoreStats);
+
+                                    foreach($visBoxScoreStats as $vs) {
+                                        if($vs->playerid === $row['PLAYERID']) {
+                                            $vs->batter_stat_r++;
+                                        break;
+                                        }
+                                    }
+                                }
+                                else {
+                                    $gameState->outs_in_the_inning++;
+                                }
+                            }
                         }
                     }
-                    else if(strpos($runnerData, 'BX2') !== false) {
-                        // if error is found after BX2, then he's safe at 1st
-                        if(strpos($runnerData, 'E') !== false {
-                            $error_loc = strpos($runnerData, 'E');
-                            $bx_loc = strpos($runnerData, 'BX');
-
-                            if($error_loc > $bx_loc) {
-                                // runner is safe at 2nd
-                                $gameState->runneron2nd = $row['PLAYERID'];
-                            }
-                        }
-                        else {
-                            $gameState->outs_in_the_inning++;
-                        }
-                    }
-                    else if(strpos($row['OUTCOME'], 'BX3') !== false) {
-                        // if error is found after BX3 then he's safe at 1st
-                        if($error_on_single) {
-                            $error_loc = strpos($runnerData, 'E');
-                            $bx_loc = strpos($runnerData, 'BX');
-
-                            if($error_loc > $bx_loc) {
-                                // runner is safe at 3rd
-                                $gameState->runneron3rd = $row['PLAYERID'];
-                            }
-                        }
-                        else {
-                            $gameState->outs_in_the_inning++;
-                        }
+                    else {
+                        $gameState->runneron1st = $row['PLAYERID'];
                     }
                 }
 
                 // doubles, not defensive interference
                 else if($batterData[0]==='D' && $batterData[1] !== 'I') {
-                    getDoubles($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
+                    getDoubles($row['TEAMATBAT'], $row['PLAYERID'], $gameState, $visBoxScoreStats, $homeBoxScoreStats);
+
+                    // move base runners
+                    foreach($runnerData as $rd) {
+                        moveBaseRunners($row, $rd, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
+                    }
+
+                    if(strpos($row['OUTCOME'], 'BX') !== false) {
+                        foreach($runnerData as $rd) {
+                            if(strpos($rd, 'BX2') !== false) {
+                                // if error is found, then he's safe at 1st
+                                if(strpos($rd, 'E') !== false) {
+                                    getErrors($row, $runnerData, $gameState, $visBoxScoreStats, $homeBoxScoreStats, $visPitcherBoxScoreStats, $homePitcherBoxScoreStats);
+
+                                    $gameState->runneron2nd = $row['PLAYERID'];
+                                }
+                                else {
+                                    $gameState->outs_in_the_inning++;
+                                }
+                            }
+                            else if(strpos($rd, 'BX3') !== false) {
+                                // if error is found, then he's safe at 3rd
+                                if(strpos($rd, 'E') !== false) {
+                                    getErrors($row, $runnerData, $gameState, $visBoxScoreStats, $homeBoxScoreStats, $visPitcherBoxScoreStats, $homePitcherBoxScoreStats);
+
+                                    $gameState->runneron3rd = $row['PLAYERID'];
+                                }
+                                else {
+                                    $gameState->outs_in_the_inning++;
+                                }
+                            }
+                            else if(strpos($rd, 'BXH') !== false) {
+                                // if error is found, then he's safe at 2nd
+                                if(strpos($rd, 'E') !== false) {
+                                    getErrors($row, $runnerData, $gameState, $visBoxScoreStats, $homeBoxScoreStats, $visPitcherBoxScoreStats, $homePitcherBoxScoreStats);
+
+                                    foreach($visBoxScoreStats as $vs) {
+                                        if($vs->playerid === $row['PLAYERID']) {
+                                            $vs->batter_stat_r++;
+                                        break;
+                                        }
+                                    }
+                                }
+                                else {
+                                    $gameState->outs_in_the_inning++;
+                                }
+                            }
+                        }
+                    }
+                    else {
+                        $gameState->runneron2nd = $row['PLAYERID'];
+                    }
                 }
 
-                // triples
+                // // triples
                 else if($batterData[0]==='T') {
-                    getTriples($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
+                    getTriples($tab, $playerid, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
+
+                    // move base runners
+                    foreach($runnerData as $rd) {
+                        moveBaseRunners($row, $rd, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
+                    }
+
+                    if(strpos($row['OUTCOME'], 'BX') !== false) {
+                        foreach($runnerData as $rd) {
+                            if(strpos($rd, 'BX3') !== false) {
+                                // if error is found, then he's safe at 3rd
+                                if(strpos($rd, 'E') !== false) {
+                                    getErrors($row, $runnerData, $gameState, $visBoxScoreStats, $homeBoxScoreStats, $visPitcherBoxScoreStats, $homePitcherBoxScoreStats);
+
+                                    $gameState->runneron3rd = $row['PLAYERID'];
+                                }
+                                else {
+                                    $gameState->outs_in_the_inning++;
+                                }
+                            }
+                            else if(strpos($rd, 'BXH') !== false) {
+                                // if error is found, then he's safe at 2nd
+                                if(strpos($rd, 'E') !== false) {
+                                    getErrors($row, $runnerData, $gameState, $visBoxScoreStats, $homeBoxScoreStats, $visPitcherBoxScoreStats, $homePitcherBoxScoreStats);
+
+                                    foreach($visBoxScoreStats as $vs) {
+                                        if($vs->playerid === $row['PLAYERID']) {
+                                            $vs->batter_stat_r++;
+                                        break;
+                                        }
+                                    }
+                                }
+                                else {
+                                    $gameState->outs_in_the_inning++;
+                                }
+                            }
+                        }
+                    }
+                    else {
+                        $gameState->runneron3rd = $row['PLAYERID'];
+                    }
                 }
 
-                // homeruns
+                // // homeruns
                 else if(strpos($batterData, 'HR') !== false) {
-                    getHomeRuns($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
+                    getHomeRuns($row['TEAMATBAT'], $row['PLAYERID'], $gameState, $visBoxScoreStats, $homeBoxScoreStats);
+
+                    foreach($runnerData as $rd) {
+                        moveBaseRunners($row, $rd, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
+                    }
                 }
 
-                // balk
+                // // balk
                 else if(strpos($batterData, 'BK') !== false) {
-                    getBalk($row, $gameState, $visPitcherBoxScoreStats, $homePitcherBoxScoreStats);
+                    getBalk($row['TEAMATBAT'], $row['PITCHERID'], $gameState, $visPitcherBoxScoreStats, $homePitcherBoxScoreStats);
+
+                    foreach($runnerData as $rd) {
+                        moveBaseRunners($row, $rd, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
+                    }
                 }
 
                 else if(strpos($batterData, 'GDP') !== false) {
-                    getGDP($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
+                    getGDP($row['TEAMATBAT'], $row['PLAYERID'], $batterData, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
+
+                    foreach($runnerData as $rd) {
+                        moveBaseRunners($row, $rd, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
+                    }
+
+                    if(strpos($row['OUTCOME'], 'B-1') !== false) {
+                        $gameState->runneron1st = $row['PLAYERID'];
+                    }
                 }
 
-                else if(strpos($batterData, 'GTP') !== false) {
-                    getGTP($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
-                }
+                // else if(strpos($batterData, 'GTP') !== false) {
+                //     getGTP($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
+                // }
 
-                else if(strpos($batterData, 'FO') !== false) {
-                    getFO($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
-                }
+                // else if(strpos($batterData, 'FO') !== false) {
+                //     getFO($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
+                // }
 
-                else if(strpos($batterData, 'FC') !== false) {
-                    getFC($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
-                }
+                // else if(strpos($batterData, 'FC') !== false) {
+                //     getFC($row, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
+                // }
 
                 // // POPUPS, NOT ERRORS
                 // else if($row['OUTCOME'][0] === '1' || $row['OUTCOME'][0] === '2' || $row['OUTCOME'][0] === '3' || $row['OUTCOME'][0] === '4' || $row['OUTCOME'][0] === '5' || $row['OUTCOME'][0] === '6' || $row['OUTCOME'][0] === '7' || $row['OUTCOME'][0] === '8' || $row['OUTCOME'][0] === '9' || strpos($row['OUTCOME'], 'FC') !== false) {
