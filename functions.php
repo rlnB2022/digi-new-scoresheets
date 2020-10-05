@@ -377,14 +377,18 @@ function getStrikeouts($tab, $playerid, &$gameState, &$visBoxScoreStats, &$homeB
 
     // add at-bat if RISP
     if(isRISP($gameState)) {
+        // showMessage('team: ' . $tab . ': K');
         addRISP_AB($tab, $gameState);
     }
 
 }
 
 function advanceBatter($tab, $runnerData, $playerid, &$gameState) {
+    
+    $teamatbat = $tab === '0' ? $visBoxScoreStats : $homeBoxScoreStats;
+
     if(strpos($runnerdata, 'B-H') !== false) {
-        foreach($tab as $tb) {
+        foreach($teamatbat as $tb) {
             if($tb->playerid === $playerid) {
                 $tb->batter_stat_r++;
             }
@@ -867,6 +871,7 @@ function getSingles($tab, $playerid, &$gameState, &$visBoxScoreStats, &$homeBoxS
 
     // add at-bat and hit if RISP
     if(isRISP($gameState)) {
+        // showMessage('team: ' . $tab . ': 1B');
         addRISP_AB($tab, $gameState);
         addRISP_H($tab, $gameState);
     }
@@ -887,6 +892,7 @@ function getDoubles($tab, $playerid, &$gameState, &$visBoxScoreStats, &$homeBoxS
 
     // add at-bat and hit if RISP
     if(isRISP($gameState)) {
+        // showMessage('team: ' . $tab . ': 2B');
         addRISP_AB($tab, $gameState);
         addRISP_H($tab, $gameState);
     }
@@ -907,6 +913,7 @@ function getTriples($tab, $playerid, &$gameState, &$visBoxScoreStats, &$homeBoxS
 
     // add at-bat and hit if RISP
     if(isRISP($gameState)) {
+        // showMessage('team: ' . $tab . ': 3B');
         addRISP_AB($tab, $gameState);
         addRISP_H($tab, $gameState);
     }
@@ -932,6 +939,7 @@ function getHomeruns($tab, $playerid, &$gameState, &$visBoxScoreStats, &$homeBox
 
     // add at-bat and hit if RISP
     if(isRISP($gameState)) {
+        // showMessage('team: ' . $tab . ': HR');
         addRISP_AB($tab, $gameState);
         addRISP_H($tab, $gameState);
     }
@@ -1063,7 +1071,7 @@ function getPositionByNumber($num) {
     return $pos[$num];
 }
 
-function getErrors($row, $runnerData, &$gameState, &$visBoxScoreStats, &$homeBoxScoreStats, &$visPitcherBoxScoreStats, &$homePitcherBoxScoreStats) {
+function getErrors($row, $errorData, &$gameState, &$visBoxScoreStats, &$homeBoxScoreStats, &$visPitcherBoxScoreStats, &$homePitcherBoxScoreStats) {
 
     $player_error = '';
     $errorsMade = 0;
@@ -1075,7 +1083,7 @@ function getErrors($row, $runnerData, &$gameState, &$visBoxScoreStats, &$homeBox
     // fielders other than the pitcher check
     for($i = 2; $i < 10; $i++) {
 
-        $errorsMade = substr_count($runnerData, 'E' . $i);
+        $errorsMade = substr_count($errorData, 'E' . $i);
 
         if($errorsMade > 0) {
             // get position of fielder who made error
@@ -1102,7 +1110,7 @@ function getErrors($row, $runnerData, &$gameState, &$visBoxScoreStats, &$homeBox
     }
 
     // check pitchers
-    $errorsMade = substr_count($runnerData, 'E1');
+    $errorsMade = substr_count($errorData, 'E1');
 
     if($errorsMade > 0) {
         foreach($pitcher_teamatbat as $vs) {
@@ -1158,7 +1166,12 @@ function checkEndOfInning($row, &$gameState) {
 
 }
 
-function getGDP($tab, $playerid, $batterData, $runnerData, &$gameState, &$visBoxScoreStats, &$homeBoxScoreStats) {
+function getGDP($row, $tab, $playerid, $batterData, $runnerData, &$gameState, &$visBoxScoreStats, &$homeBoxScoreStats) {
+
+    if(isRISP($gameState)) {
+        // showMessage('team: ' . $tab . ': GDP');
+        addRISP_AB($tab, $gameState);
+    }
 
     $teamatbat = $tab === '0' ? $visBoxScoreStats : $homeBoxScoreStats;
 
@@ -1205,10 +1218,10 @@ function getGDP($tab, $playerid, $batterData, $runnerData, &$gameState, &$visBox
         $gameState->outs_in_the_inning += $outs;
 
         foreach($runnerData as $rd) {
-            moveBaseRunners($row, $rd, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
+            moveBaseRunners($row, $rd, $gameState, $visBoxScoreStats, $homeBoxScoreStats, $visPitcherBoxScoreStats, $homePitcherBoxScoreStats);
         }
     }
-    else if($gameState->outs_in_the_inning < 3) {
+    else {
         // if there are two outs in the inning and both outs
         // were made on this event, then the batter is safe at first
         $gameState->runneron1st = $playerid;
@@ -1234,6 +1247,10 @@ function getGDP($tab, $playerid, $batterData, $runnerData, &$gameState, &$visBox
 
 function getGTP($tab, $playerid, $batterData, &$gameState, &$visBoxScoreStats, &$homeBoxScoreStats) {
 
+    if(isRISP($gameState)) {
+        addRISP_AB($tab, $gameState);
+    }
+
     $teamatbat = $tab === '0' ? $visBoxScoreStats : $homeBoxScoreStats;
 
     foreach($teamatbat as $vs) {
@@ -1251,8 +1268,12 @@ function getGTP($tab, $playerid, $batterData, &$gameState, &$visBoxScoreStats, &
 }
 
 function getFC($tab, $pid, &$gameState, &$visBoxScoreStats, &$homeBoxScoreStats) {
-    
-    $teamatbat = $tab === '0' ? $visBoxScoreStats : $homeBoxScoreStat;
+    if(isRISP($gameState)) {
+        // showMessage('team: ' . $tab . ': FC');
+        addRISP_AB($tab, $gameState);
+    }
+
+    $teamatbat = $tab === '0' ? $visBoxScoreStats : $homeBoxScoreStats;
 
     foreach($teamatbat as $vs) {
         if($vs->playerid === $pid) {
@@ -1263,7 +1284,12 @@ function getFC($tab, $pid, &$gameState, &$visBoxScoreStats, &$homeBoxScoreStats)
 
 }
 
-function getFO($row, $pid, $batterData, $runnerData, &$gameState, &$visBoxScoreStats, &$homeBoxScoreStats) {
+function getFO($row, $pid, $batterData, $runnerData, &$gameState, &$visBoxScoreStats, &$homeBoxScoreStats, &$visPitcherBoxScoreStats, &$homePitcherBoxScoreStats) {
+
+    if(isRISP($gameState)) {
+        // showMessage('team: ' . $tab . ': FO');
+        addRISP_AB($row['TEAMATBAT'], $gameState);
+    }
 
     $teamatbat = $row['TEAMATBAT'] === '0' ? $visBoxScoreStats : $homeBoxScoreStats;
 
@@ -1281,7 +1307,7 @@ function getFO($row, $pid, $batterData, $runnerData, &$gameState, &$visBoxScoreS
     }
 
     foreach($runnerData as $rd) {
-        moveBaseRunners($row, $rd, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
+        moveBaseRunners($row, $rd, $gameState, $visBoxScoreStats, $homeBoxScoreStats, $visPitcherBoxScoreStats, $homePitcherBoxScoreStats);
 
         if(strpos($rd, 'B-') !== false) {
             advanceBatter($row['TEAMATBAT'], $rd, $row['PLAYERID'], $gameState);
