@@ -1,5 +1,52 @@
 <?php
 
+function getBatterDataLength($outcome) {
+    if(strpos($outcome, '.') !== false) {
+        return strpos($outcome, '.');
+    }
+    return strlen($outcome);
+}
+
+function assignOutfieldAssist($teamatbat, $runnerData, &$gameState, $visBoxScoreStats, $homeBoxScoreStats) {
+    $xPosition = strpos($runnerData, '(');
+
+    // get number immediately after the open parenthesis
+    // this is the fielder who threw out the runner
+    $fielder = substr($runnerData, $xPosition + 1, 1);
+
+    if($fielder >= 7 && $fielder <= 9) {
+        $fielderPosition = $fielder === 7 ? "LF" : ($fielder === 8 ? "CF" : "RF");
+
+        // get playerid of fielder
+        if($teamatbat === '0') {
+            // visiting team
+            $gameState->homeOutfieldAssists++;
+
+            foreach($homeBoxScoreStats as $vs) {
+                if($vs->playerposition === $fielderPosition) {
+                    $vs->fielder_outfield_assists++;
+                break;
+                }
+            }
+        }
+        else {
+            // home team
+            $gameState->visOutfieldAssists++;
+
+            foreach($visBoxScoreStats as $vs) {
+                if($vs->playerpos === $fielderPosition) {
+                    $vs->fielder_outfield_assists++;
+                break;
+                }
+            }
+        }
+    }
+}
+
+function getRunnerMovement($outcome) {
+    return strpos($outcome, '.') !== false;
+}
+
 function getLineScores($linky, $gamedate, $hometeam, $gamenum, $month, $day, $year) {
     $sql = "SELECT * FROM GAMELOGS WHERE DATE = '" . $gamedate  . "' AND HOMETEAM = '" . $hometeam . "' AND GAMENUM = '" . $gamenum . "' LIMIT 1";
 
@@ -15,12 +62,41 @@ function getLineScores($linky, $gamedate, $hometeam, $gamenum, $month, $day, $ye
         $vislinescore = getLineScore($row['vislinescore']);
         $homelinescore = getLineScore($row['homelinescore']);
 
+        $vTeamName = $row['visteam'];
+        $hTeamName = $row['hometeam'];
+
+        $vTeamScore = $row['visscore'];
+        $hTeamScore = $row['homescore'];
+
         ?>
-        <h1 class="date-header">
-            <?php echo getDayOfWeek($row['dayofweek']) . ", " . $month . " " . $day . ", " . $year; ?>
-        </h1>
+
+        <div class="team-scores">
+            <div class="team-row">
+                <div class="team-row-name <?php if($vTeamScore < $TeamScore) { echo 'gray-team-color'; } ?>">
+                    <?php echo getTeamName($vTeamName); ?>
+                </div>
+                <div class="team-row-score <?php if($vTeamScore < $hTeamScore) { echo 'gray-team-color'; } ?>">
+                    <?php echo $vTeamScore; ?>
+                </div>
+            </div>
+            <div class="team-row">
+                <div class="team-row-name <?php if($vTeamScore > $TeamScore) { echo 'gray-team-color'; } ?>">
+                    <?php echo getTeamName($hTeamName); ?>
+                </div>
+                <div class="team-row-score <?php if($vTeamScore > $TeamScore) { echo 'gray-team-color'; } ?>">
+                    <?php echo $hTeamScore; ?>
+                </div>
+            </div>
+        </div>
+
+        <div class="inside-boxscore">
+            <div class="close-button">
+                <p>Close</p>
+            </div>
+        </div>
+        
         <div class="boxscore-grid">
-            <div></div>
+            <div>Team</div>
             <?php
                 for($i = 0; $i < 9; $i++) { ?>
                     <div class="grid-item"><?php echo $i+1; ?></div>
@@ -31,7 +107,7 @@ function getLineScores($linky, $gamedate, $hometeam, $gamenum, $month, $day, $ye
             <div class="grid-item">R</div>
             <div class="grid-item">H</div>
             <div class="grid-item">E</div>
-            <div><?php echo getTeamName($row['visteam']); ?></div>
+            <div class="<?php if($vTeamScore < $TeamScore) { echo 'gray-team-color'; } ?>"><?php echo $row['visteam']; ?></div>
             <?php
                 for($i = 0; $i < $boxscorerows; $i++) { ?>
                     <div class="grid-item"><?php echo $vislinescore[$i]; ?></div>
@@ -42,7 +118,7 @@ function getLineScores($linky, $gamedate, $hometeam, $gamenum, $month, $day, $ye
             <div class="grid-item"><?php echo $row['visscore']; ?></div>
             <div class="grid-item"><?php echo $row['vish']; ?></div>
             <div class="grid-item"><?php echo $row['viserrors']; ?></div>
-            <div><?php echo getTeamName($row['hometeam']); ?></div>
+            <div class="<?php if($vTeamScore > $TeamScore) { echo 'gray-team-color'; } ?>"><?php echo $row['hometeam']; ?></div>
             <?php
                 for($i = 0; $i < $boxscorerows; $i++) { ?>
                     <div class="grid-item"><?php echo $homelinescore[$i]; ?></div>
@@ -54,6 +130,15 @@ function getLineScores($linky, $gamedate, $hometeam, $gamenum, $month, $day, $ye
             <div class="grid-item"><?php echo $row['homeh']; ?></div>
             <div class="grid-item"><?php echo $row['homeerrors']; ?></div>
         </div>
+
+        <div class="team-select">
+            <div class="team-select-vis <?php if($vTeamScore < $TeamScore) { echo 'gray-team-color'; } ?>">
+                <?php echo getTeamName($vTeamName); ?>
+            </div>
+            <div class="team-select-home <?php if($vTeamScore > $TeamScore) { echo 'gray-team-color'; } ?>">
+                <?php echo getTeamName($hTeamName); ?>
+            </div>
+        </div>
     <?php
     }
     else {
@@ -62,9 +147,10 @@ function getLineScores($linky, $gamedate, $hometeam, $gamenum, $month, $day, $ye
 
 }
 
-function getVisitorLineup($linky, $gameid, &$gameState, &$visBoxScoreStats, &$homeBoxScoreStats) {
+function getLineup($linky, $gameid, &$gameState, &$boxScoreStats, $visOrHome) {
 
-    $sql = "SELECT * FROM VISLINEUPS WHERE GAMEID = '" . $gameid . "'";
+    $lineup = $visOrHome === 'vis' ? 'VISLINEUPS' : 'HOMELINEUPS';
+    $sql = "SELECT * FROM " . $lineup . " WHERE GAMEID = '" . $gameid . "'";
 
     $result = mysqli_query($linky, $sql);
 
@@ -74,7 +160,7 @@ function getVisitorLineup($linky, $gameid, &$gameState, &$visBoxScoreStats, &$ho
         $row = mysqli_fetch_assoc($result);
 
         for($i = 0; $i < 9; $i++) {
-            // add playerid to visBoxScoreStats
+            // add playerid to boxScoreStats
             $batterS = new playerStat();
             $batterS->playerid = $row['batter' . ($i + 1)];
             $batterS->playerpos = $row['pos' . ($i + 1)];
@@ -83,10 +169,16 @@ function getVisitorLineup($linky, $gameid, &$gameState, &$visBoxScoreStats, &$ho
             $tempPos = 'pos_' . $batterS->playerpos;
 
             // assign position to visDefense
-            $gameState->visDefense->$tempPos = $batterS->playerid;
-            
-            array_push($gameState->visLineup, $batterS->playerid);
-            array_push($visBoxScoreStats, $batterS);
+            if($visOrHome === 'vis') {
+                $gameState->visDefense->$tempPos = $batterS->playerid;
+                array_push($gameState->visLineup, $batterS->playerid);
+            }
+            else {
+                $gameState->homeDefense->$tempPos = $batterS->playerid;
+                array_push($gameState->homeLineup, $batterS->playerid);
+            }
+
+            array_push($boxScoreStats, $batterS);
         }
     }
 
@@ -144,7 +236,9 @@ class playerStat {
     public $batter_stat_sh = 0;
     public $batter_stat_sf = 0;
     public $batter_stat_pickedoff = 0;
+    public $batter_stat_pb = 0;
     public $fielder_stat_error = 0;
+    public $fielder_outfield_assists = 0;
     public $pitcher_stat_wp = 0;
     public $pitcher_stat_pb = 0;
     public $pitcher_stat_bk = 0;
@@ -327,7 +421,7 @@ function getPlayerName($linky, $playerid) {
 
     if($resultCheck > 0) {
         $row = mysqli_fetch_assoc($result);
-        $fullname = $row['firstname'] . " " . $row['lastname'];
+        $fullname = substr($row['firstname'], 0, 1) . ". " . $row['lastname'];
     }
     else {
         echo "NOT FOUND";
@@ -554,8 +648,6 @@ function getPickoff($row, $bd, $rd, &$gameState, &$visBoxScoreStats, &$homeBoxSc
             moveBaseRunners($row, $runD, $gameState, $visBoxScoreStats, $homeBoxScoreStats, $visPitcherBoxScoreStats, $homePitcherBoxScoreStats);
         }
 
-        showMessage('2nd: ' . $gameState->runneron2nd);
-
     }
     else {
         // remove appropriate base runner
@@ -570,7 +662,6 @@ function getPickoff($row, $bd, $rd, &$gameState, &$visBoxScoreStats, &$homeBoxSc
         
     }
 
-    showMessage($gameState->runneron1st);
 }
 
 function getCaughtStealing($tab, $batterData, &$gameState, &$visBoxScoreStats, &$homeBoxScoreStats) {
@@ -636,6 +727,11 @@ function getCaughtStealing($tab, $batterData, &$gameState, &$visBoxScoreStats, &
 function moveBaseRunners($row, $runnerData, &$gameState, &$visBoxScoreStats, &$homeBoxScoreStats, &$visPitcherBoxScoreStats, &$homePitcherBoxScoreStats) {
 
     $teamatbat = $row['TEAMATBAT'] === '0' ? $visBoxScoreStats : $homeBoxScoreStats;
+
+    if(strpos($runnerData, 'X') !== false) {
+        // assign outfield assist?
+        assignOutfieldAssist($row['TEAMATBAT'], $runnerData, $gameState, $visBoxScoreStats, $homeBoxScoreStats);
+    }
 
     // runner out at Home
     if(strpos($runnerData, '3XH') !== false) {
@@ -840,6 +936,7 @@ function moveBaseRunners($row, $runnerData, &$gameState, &$visBoxScoreStats, &$h
             break;
             }
         }
+
     }
 
     // runner on 1st to 3rd
@@ -933,7 +1030,6 @@ function getTriples($tab, $playerid, &$gameState, &$visBoxScoreStats, &$homeBoxS
 
     // add at-bat and hit if RISP
     if(isRISP($gameState)) {
-        // showMessage('team: ' . $tab . ': 3B');
         addRISP_AB($tab, $gameState);
         addRISP_H($tab, $gameState);
     }
@@ -979,16 +1075,26 @@ function getWildPitch($tab, $pid, &$gameState, &$visPitcherBoxScoreStats, &$home
 
 }
 
-function getPassedBall($tab, $pid, &$gameState, &$visPitcherBoxScoreStats, &$homePitcherBoxScoreStats) {
+function getPassedBall($tab, &$gameState, &$visBoxScoreStats, &$homeBoxScoreStats) {
 
-    $teamatbat = $tab === '0' ? $visPitcherBoxScoreStats : $homePitcherBoxScoreStats;
+    $teamatbat = $tab === '0' ? $homeBoxScoreStats : $visBoxScoreStats;
 
-    // store stat for pitcher
+    $catcher = $tab === '0' ? $gameState->homeDefense->pos_C : $gameState->visDefense->pos_C;
+
+    // store stat for catcher
     foreach($teamatbat as $vs) {
-        if($vs->playerid === $pid) {
-            $vs->pitcher_stat_pb++;
+        if($vs->playerid === $catcher) {
+            $vs->batter_stat_pb++;
         break;
         }
+    }
+
+    // assign passed ball to fielding team
+    if($tab === '0') {
+        $gameState->homePassedBalls++;
+    }
+    else {
+        $gameState->visPassedBalls++;
     }
 
 }
@@ -1098,7 +1204,7 @@ function getErrors($row, $errorData, &$gameState, &$visBoxScoreStats, &$homeBoxS
 
     $teamatbat = $row['TEAMATBAT'] === '0' ? $visBoxScoreStats : $homeBoxScoreStats;
 
-    $pitcher_teamatbat = $row['TEAMATBAT'] === '0' ? $visPitcherBoxScoreStats : $homePitcherBoxScoreStats;
+    $pitcher_teamatbat = $row['TEAMATBAT'] === '0' ? $homePitcherBoxScoreStats : $visPitcherBoxScoreStats;
 
     // fielders other than the pitcher check
     for($i = 2; $i < 10; $i++) {
@@ -1134,8 +1240,8 @@ function getErrors($row, $errorData, &$gameState, &$visBoxScoreStats, &$homeBoxS
 
     if($errorsMade > 0) {
         foreach($pitcher_teamatbat as $vs) {
+            if($vs->playerid === $row['PITCHERID']) {
 
-            if($vs->playerid === $row['pitcherid']) {
                 $vs->fielder_stat_error += $errorsMade;
 
                 if($row['TEAMATBAT'] === '0') {
@@ -1144,6 +1250,7 @@ function getErrors($row, $errorData, &$gameState, &$visBoxScoreStats, &$homeBoxS
                 else {
                     $gameState->visErrors += $errorsMade;
                 }
+            break;
             }
 
         }
@@ -1151,7 +1258,7 @@ function getErrors($row, $errorData, &$gameState, &$visBoxScoreStats, &$homeBoxS
 
 }
 
-function getNumRunnersOnBase(&$gameState) {
+function getNumRunnersOnBase($gameState) {
     $count = 0;
 
     if($gameState->runneron1st !== 'None') {
@@ -1178,9 +1285,19 @@ function checkEndOfInning($row, &$gameState) {
     if($row['TEAMATBAT'] != $gameState->teamatbat) {
 
         // prepare for new inning
+
+        if($gameState->teamatbat === '0') {
+            $gameState->visTeamLOB += $numRunnersOnBase;
+        }
+        else {
+            $gameState->homeTeamLOB += $numRunnersOnBase;
+        }
+
         $gameState->clearRunners();
         $gameState->teamatbat ^= 1;
         $gameState->outs_in_the_inning = 0;
+
+
 
     }
 
@@ -1287,7 +1404,7 @@ function getGTP($tab, $playerid, $batterData, &$gameState, &$visBoxScoreStats, &
     }
 }
 
-function getFC($tab, $pid, $batterData, &$gameState, &$visBoxScoreStats, &$homeBoxScoreStats) {
+function getFC($tab, $playerid, $batterData, &$gameState, &$visBoxScoreStats, &$homeBoxScoreStats) {
     if(isRISP($gameState)) {
         // showMessage('team: ' . $tab . ': FC');
         addRISP_AB($tab, $gameState);
@@ -1296,7 +1413,7 @@ function getFC($tab, $pid, $batterData, &$gameState, &$visBoxScoreStats, &$homeB
     $teamatbat = $tab === '0' ? $visBoxScoreStats : $homeBoxScoreStats;
 
     foreach($teamatbat as $vs) {
-        if($vs->playerid === $pid) {
+        if($vs->playerid === $playerid) {
             if(strpos($batterData, 'SH') === false) {
                 $vs->batter_stat_ab++;
             }
@@ -1450,7 +1567,8 @@ function checkForSub($row, &$gameState, &$visBoxScoreStats, &$homeBoxScoreStats)
                     }
 
                     $gameState->homeLineup[$row['COUNT']-1] = $subBatter->playerid;
-                    $gameState->homeDefense->$temp_pos = $subBatter->playerid;                }
+                    $gameState->homeDefense->$temp_pos = $subBatter->playerid;
+                }
             }
             else {
                 // switch position
@@ -1467,11 +1585,54 @@ function checkForSub($row, &$gameState, &$visBoxScoreStats, &$homeBoxScoreStats)
                 }
             }
         }
+        else {
+            // pitcher subbed
+            $subBatter->playerid = $row['INNING'];
+            $subBatter->playerpos = getPosition($row['PITCHES']);
+            $subBatter->status = 'sub';
+
+            if($row['PLAYERID'] === '0') {
+                // player being subbed out
+                $temp_playerid = $gameState->visLineup[$row['COUNT']-1];
+
+                $vCount = 0;
+
+                foreach($visBoxScoreStats as $vs) {
+                    if($vs->playerid === $temp_playerid) {
+                        array_splice($visBoxScoreStats, $vCount + 1, 0, [$subBatter]);
+                        $gameState->visLineup[$row['COUNT']-1] = $temp_playerid;
+                    break;
+                    }
+                    $vCount++;
+                }
+
+                $gameState->visLineup[$row['COUNT']-1] = $subBatter->playerid;
+                $gameState->visDefense->$temp_pos = $subBatter->playerid;
+            }
+            else {
+                // player being subbed out
+                $temp_playerid = $gameState->homeLineup[$row['COUNT']-1];
+
+                $hCount = 0;
+
+                foreach($homeBoxScoreStats as $vs) {
+                    if($vs->playerid === $temp_playerid) {
+                        array_splice($homeBoxScoreStats, $hCount + 1, 0, [$subBatter]);
+                        $gameState->homeLineup[$row['COUNT']-1] = $temp_playerid;
+                    break;
+                    }
+                    $hCount++;
+                }
+
+                $gameState->homeLineup[$row['COUNT']-1] = $subBatter->playerid;
+                $gameState->homeDefense->$temp_pos = $subBatter->playerid;
+            }
+        }
     }
 }
 
 function getPosition($num) {
-    $pos = ['P', 'C', '1B', '2B', '3B', 'SS', 'LF', 'CF', 'RF', 'DH'];
+    $pos = ['P', 'C', '1B', '2B', '3B', 'SS', 'LF', 'CF', 'RF', 'DH', 'PH', 'PR'];
 
     return $pos[$num-1];
 }

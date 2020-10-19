@@ -50,76 +50,117 @@ header {
 
 }
 
+.gray-team-color {
+    color: rgb(148, 148, 148);
+}
+
+.boxscore {
+    background-color: #fff;
+    position: absolute;
+    left: 0;
+    top: 10vh;
+    bottom: 10vh;
+    display: none;
+    overflow-y: scroll;
+    width: 100vw;
+
+    .team-scores {
+        margin: 10px 0;
+
+        .team-row {
+            font-family: 'Anton', sans-serif;
+            display: flex;
+            justify-content: space-between;
+            padding: 0px 100px;
+
+            .team-row-name, .team-row-score {
+                text-transform:  uppercase;
+                font-size: 30px;
+                font-weight: bold;
+            }
+
+        }
+    }
+
+    .team-select {
+        display: flex;
+
+        .team-select-vis, .team-select-home {
+            position: relative;
+            text-transform: uppercase;
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            font-weight: bold;
+        }
+
+        .team-select-vis::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 10%;
+            width: 80%;
+            height: 2px;
+            background: #000;
+        }
+
+    }
+
+    ::-webkit-scrollbar {
+        display: none;
+    }
+
+    .inside-boxscore {
+        position: absolute;
+        overflow-y: auto;
+
+        .close-button {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: #fff;
+
+            p {
+                background-color: blue;
+                width: 100%;
+                padding: 20px;
+                text-align: center;
+                color: #fff;
+                font-size: 24px;
+            }
+        }
+    }
+
+    
+
+    .date-header {
+        text-align: center;
+        font-size: 14px;
+        padding: 5px;
+    }
+
+    .boxscore-grid {
+        width: 90%;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 7fr repeat(13, 1fr);
+        grid-template-rows: 1fr 1fr 1fr 1fr;
+        border-bottom: 1px solid rgba(148, 148, 148, .5);
+
+        .grid-item {
+            padding: 2px;
+        }
+    }
+
+}
+
 .grid-of-games {
     width: 100vw;
     margin-top: 100px;
     display: flex;
     flex-wrap: wrap;
-
-    .boxscore {
-        background-color: rgba(255,255,255,.95);
-        position: absolute;
-        left: 5vw;
-        top: 15vh;
-        display: none;
-        width: 90vw;
-        margin: 0 auto;
-        border-radius: 10px;
-        z-index: 100;
-        border: 3px solid #000;
-
-        .date-header {
-            width: 100%;
-            text-align: center;
-            font-size: 14px;
-        }
-
-        .boxscore-grid {
-            display: grid;
-            grid-template-columns: 7fr repeat(13, 1fr);
-            grid-template-rows: 1fr 1fr 1fr 1fr;
-
-            .grid-item {
-                padding: 2px;
-                border: 1px solid #000;
-            }
-        }
-
-        .boxscore-stats {
-            width: 100%;
-            display: grid;
-            grid-template-columns: 4fr repeat(7, 1fr);
-            grid-template-rows: auto;
-            border-top: 1px solid #000;
-            border-bottom: 1px solid #000;
-            font-size: 12px;
-
-            .boxscore-bottom-border {
-                border-bottom: 1px solid #000;
-            }
-
-            .boxscore-center {
-                text-align: center;
-            }
-
-            .boxscore-cell {
-                border-left: 1px solid #000;
-                padding: 2px 0;
-            }
-
-            .boxscore-name {
-                padding-left: 5px;
-            }
-
-            .boxscore-cell-end {
-                border-right: 1px solid #000;
-            }
-
-            .boxscore-sub {
-                padding-left: 15px;
-            }
-        }
-    }
+    overflow: hidden;
 
     .game-container {
         width: 90%;

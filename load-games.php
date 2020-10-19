@@ -9,14 +9,18 @@
     $month = '';
     $day = '';
 
-    function getTeamName($name) {
+    function showMessage($msg) {
+        echo "<script type='text/javascript'>alert('$msg');</script>";
+    }
+
+    function getTeamName($name, $year) {
         switch ($name) {
             case "NLS":
                 return "NL All-Stars";
             case "ALS":
                 return "AL All-Stars";
             case "ANA":
-                if (curYear >= 2005) {
+                if ($year >= 2005) {
                     return "Los Angeles (A)";
                 } else {
                     return "Anaheim";
@@ -126,7 +130,7 @@
                     <div class="cell top-row-header">H</div>
                     <div class="cell top-row-header">E</div>
                     <div class="btm-space vis-teamname">
-                        <?php echo getTeamName($row['visteam']); ?>
+                        <?php echo getTeamName($row['visteam'], $year); ?>
                     </div>
                     <div class="cell btm-space vis-runs-scored">
                         <?php echo $row['visscore']; ?>
@@ -138,7 +142,7 @@
                         <?php echo $row['viserrors']; ?>
                     </div>
                     <div class="home-teamname">
-                        <?php echo getTeamName($row['hometeam']); ?>
+                        <?php echo getTeamName($row['hometeam'], $year); ?>
                     </div>
                     <div class="cell home-runs-scored">
                         <?php echo $row['homescore']; ?>

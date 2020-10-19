@@ -64,6 +64,117 @@ header .hamburger-menu .hamburger-line {
   margin: 3px;
 }
 
+.gray-team-color {
+  color: #949494;
+}
+
+.boxscore {
+  background-color: #fff;
+  position: absolute;
+  left: 0;
+  top: 10vh;
+  bottom: 10vh;
+  display: none;
+  overflow-y: scroll;
+  width: 100vw;
+}
+
+.boxscore .team-scores {
+  margin: 10px 0;
+}
+
+.boxscore .team-scores .team-row {
+  font-family: 'Anton', sans-serif;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: justify;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
+  padding: 0px 100px;
+}
+
+.boxscore .team-scores .team-row .team-row-name, .boxscore .team-scores .team-row .team-row-score {
+  text-transform: uppercase;
+  font-size: 30px;
+  font-weight: bold;
+}
+
+.boxscore .team-select {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+}
+
+.boxscore .team-select .team-select-vis, .boxscore .team-select .team-select-home {
+  position: relative;
+  text-transform: uppercase;
+  -webkit-box-flex: 1;
+      -ms-flex: 1;
+          flex: 1;
+  text-align: center;
+  padding: 10px;
+  font-weight: bold;
+}
+
+.boxscore .team-select .team-select-vis::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 10%;
+  width: 80%;
+  height: 2px;
+  background: #000;
+}
+
+.boxscore ::-webkit-scrollbar {
+  display: none;
+}
+
+.boxscore .inside-boxscore {
+  position: absolute;
+  overflow-y: auto;
+}
+
+.boxscore .inside-boxscore .close-button {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: #fff;
+}
+
+.boxscore .inside-boxscore .close-button p {
+  background-color: blue;
+  width: 100%;
+  padding: 20px;
+  text-align: center;
+  color: #fff;
+  font-size: 24px;
+}
+
+.boxscore .date-header {
+  text-align: center;
+  font-size: 14px;
+  padding: 5px;
+}
+
+.boxscore .boxscore-grid {
+  width: 90%;
+  margin: 0 auto;
+  display: -ms-grid;
+  display: grid;
+  -ms-grid-columns: 7fr (1fr)[13];
+      grid-template-columns: 7fr repeat(13, 1fr);
+  -ms-grid-rows: 1fr 1fr 1fr 1fr;
+      grid-template-rows: 1fr 1fr 1fr 1fr;
+  border-bottom: 1px solid rgba(148, 148, 148, 0.5);
+}
+
+.boxscore .boxscore-grid .grid-item {
+  padding: 2px;
+}
+
 .grid-of-games {
   width: 100vw;
   margin-top: 100px;
@@ -72,77 +183,7 @@ header .hamburger-menu .hamburger-line {
   display: flex;
   -ms-flex-wrap: wrap;
       flex-wrap: wrap;
-}
-
-.grid-of-games .boxscore {
-  background-color: rgba(255, 255, 255, 0.95);
-  position: absolute;
-  left: 5vw;
-  top: 15vh;
-  display: none;
-  width: 90vw;
-  margin: 0 auto;
-  border-radius: 10px;
-  z-index: 100;
-  border: 3px solid #000;
-}
-
-.grid-of-games .boxscore .date-header {
-  width: 100%;
-  text-align: center;
-  font-size: 14px;
-}
-
-.grid-of-games .boxscore .boxscore-grid {
-  display: -ms-grid;
-  display: grid;
-  -ms-grid-columns: 7fr (1fr)[13];
-      grid-template-columns: 7fr repeat(13, 1fr);
-  -ms-grid-rows: 1fr 1fr 1fr 1fr;
-      grid-template-rows: 1fr 1fr 1fr 1fr;
-}
-
-.grid-of-games .boxscore .boxscore-grid .grid-item {
-  padding: 2px;
-  border: 1px solid #000;
-}
-
-.grid-of-games .boxscore .boxscore-stats {
-  width: 100%;
-  display: -ms-grid;
-  display: grid;
-  -ms-grid-columns: 4fr (1fr)[7];
-      grid-template-columns: 4fr repeat(7, 1fr);
-  -ms-grid-rows: auto;
-      grid-template-rows: auto;
-  border-top: 1px solid #000;
-  border-bottom: 1px solid #000;
-  font-size: 12px;
-}
-
-.grid-of-games .boxscore .boxscore-stats .boxscore-bottom-border {
-  border-bottom: 1px solid #000;
-}
-
-.grid-of-games .boxscore .boxscore-stats .boxscore-center {
-  text-align: center;
-}
-
-.grid-of-games .boxscore .boxscore-stats .boxscore-cell {
-  border-left: 1px solid #000;
-  padding: 2px 0;
-}
-
-.grid-of-games .boxscore .boxscore-stats .boxscore-name {
-  padding-left: 5px;
-}
-
-.grid-of-games .boxscore .boxscore-stats .boxscore-cell-end {
-  border-right: 1px solid #000;
-}
-
-.grid-of-games .boxscore .boxscore-stats .boxscore-sub {
-  padding-left: 15px;
+  overflow: hidden;
 }
 
 .grid-of-games .game-container {

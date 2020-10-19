@@ -10,7 +10,7 @@
         <title>Test List of Games</title>
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@500&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Anton&family=Roboto:wght@500&display=swap" rel="stylesheet">
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
         <script>
             $(document).ready(function() {
@@ -25,8 +25,7 @@
                     },function() {
                         $(window).scrollTop(0);
                         $('.button-choice').on('click', function(event) {
-                            let thisGameId = '';
-                            thisGameId = event.target.dataset.boxscore;
+                            let thisGameId = event.target.dataset.boxscore;
 
                             // show boxscore in a pop-up window
                             $("#myboxscore").load("load-boxscore.php", {
@@ -39,9 +38,7 @@
                     });
                 });
                 $('.button-choice').on('click', function(event) {
-                    let thisGameId = '';
-                    thisGameId = event.target.dataset.boxscore;
-                    console.log(thisGameId);
+                    let thisGameId = event.target.dataset.boxscore;
 
                     // show boxscore in a pop-up window
                     $("#myboxscore").load("load-boxscore.php", {
@@ -68,7 +65,7 @@
                     case "ALS":
                     return "AL All-Stars";
                     case "ANA":
-                    if (curYear >= 2005) {
+                    if ($year >= '2005') {
                         return "Los Angeles (A)";
                     } else {
                         return "Anaheim";
@@ -170,15 +167,16 @@
                 <div class="hamburger-line"></div>
             </div>
         </header>
-
+<!-- 
         <div>
             <button id="#test-pitches">Test</button>
+        </div> -->
+
+        <div id="myboxscore" class="boxscore">
+                
         </div>
 
         <section id="gridgames" class="grid-of-games">
-            <div id="myboxscore" class="boxscore">
-                
-            </div>
 
             <?php
 
@@ -234,11 +232,11 @@
                             <div class="separator"></div>
                             <div class="button-options">
                                 <div class="btn-scoresheet button-choice">
-                                    <img src="./images/recap.png" alt="Watch game unfold">
+                                    <img src="./images/recap.png" alt="View Scoresheet">
                                     <p>Scoresheet</p>
                                 </div>
                                 <div data-boxscore="<?php echo $row['hometeam'] . $year . $month . $day . $row['gamenum']; ?>" class="btn-box-score button-choice">
-                                    <img src="./images/recap.png" alt="Watch game unfold">
+                                    <img src="./images/recap.png" alt="View Box Score">
                                     <p>Box Score</p>
                                 </div>
                                 <div class="btn-recap button-choice">
