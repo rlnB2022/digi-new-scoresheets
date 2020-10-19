@@ -104,6 +104,7 @@ header .hamburger-menu .hamburger-line {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
+  margin-bottom: 30px;
 }
 
 .boxscore .team-select .team-select-vis, .boxscore .team-select .team-select-home {
@@ -153,10 +154,17 @@ header .hamburger-menu .hamburger-line {
   font-size: 24px;
 }
 
-.boxscore .date-header {
-  text-align: center;
-  font-size: 14px;
-  padding: 5px;
+.boxscore .boxscore-stats {
+  width: 90%;
+  margin: 0 auto;
+  display: -ms-grid;
+  display: grid;
+  -ms-grid-columns: 7fr (1fr)[6];
+      grid-template-columns: 7fr repeat(6, 1fr);
+  -ms-grid-rows: auto;
+      grid-template-rows: auto;
+  grid-row-gap: 5px;
+  font-size: 16px;
 }
 
 .boxscore .boxscore-grid {
@@ -173,6 +181,43 @@ header .hamburger-menu .hamburger-line {
 
 .boxscore .boxscore-grid .grid-item {
   padding: 2px;
+}
+
+.boxscore .boxscore-sub {
+  padding-left: 15px;
+}
+
+.boxscore .boxscore-stats-totals {
+  width: 90%;
+  margin: 0 auto;
+  display: -ms-grid;
+  display: grid;
+  -ms-grid-columns: 7fr (1fr)[6];
+      grid-template-columns: 7fr repeat(6, 1fr);
+  -ms-grid-rows: auto;
+      grid-template-rows: auto;
+  grid-row-gap: 5px;
+  font-size: 16px;
+}
+
+.pos-color {
+  color: #949494;
+}
+
+.center-item {
+  text-align: center;
+}
+
+.grid-underline {
+  border-bottom: 1px solid rgba(148, 148, 148, 0.3);
+}
+
+.grid-padding {
+  padding-bottom: 10px;
+}
+
+.sm-font {
+  font-size: 10px;
 }
 
 .grid-of-games {

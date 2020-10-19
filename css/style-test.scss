@@ -84,6 +84,7 @@ header {
 
     .team-select {
         display: flex;
+        margin-bottom: 30px;
 
         .team-select-vis, .team-select-home {
             position: relative;
@@ -132,12 +133,14 @@ header {
         }
     }
 
-    
-
-    .date-header {
-        text-align: center;
-        font-size: 14px;
-        padding: 5px;
+    .boxscore-stats {
+        width: 90%;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 7fr repeat(6, 1fr);
+        grid-template-rows: auto;
+        grid-row-gap: 5px;
+        font-size: 16px;
     }
 
     .boxscore-grid {
@@ -153,6 +156,40 @@ header {
         }
     }
 
+    .boxscore-sub {
+        padding-left: 15px;
+    }
+
+    .boxscore-stats-totals {
+        width: 90%;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 7fr repeat(6, 1fr);
+        grid-template-rows: auto;
+        grid-row-gap: 5px;
+        font-size: 16px;
+    }
+
+}
+
+.pos-color {
+    color: rgb(148, 148, 148);
+}
+
+.center-item {
+    text-align: center;
+}
+
+.grid-underline {
+    border-bottom: 1px solid rgba(148, 148, 148, .3);
+}
+
+.grid-padding {
+    padding-bottom: 10px;
+}
+
+.sm-font {
+    font-size: 10px;
 }
 
 .grid-of-games {

@@ -217,6 +217,7 @@ class playerStat {
     public $playerid = '';
     public $playerpos = '';
     public $batter_stat_ab = 0;
+    public $batter_stat_h = 0;
     public $batter_stat_1b = 0;
     public $batter_stat_2b = 0;
     public $batter_stat_3b = 0;
@@ -984,6 +985,7 @@ function getSingles($tab, $playerid, &$gameState, &$visBoxScoreStats, &$homeBoxS
         if($vs->playerid === $playerid) {
             $vs->batter_stat_1b++;
             $vs->batter_stat_ab++;
+            $vs->batter_stat_h++;
         }
     }
 
@@ -1005,6 +1007,7 @@ function getDoubles($tab, $playerid, &$gameState, &$visBoxScoreStats, &$homeBoxS
         if($vs->playerid === $playerid) {
             $vs->batter_stat_2b++;
             $vs->batter_stat_ab++;
+            $vs->batter_stat_h++;
         }
     }
 
@@ -1025,6 +1028,7 @@ function getTriples($tab, $playerid, &$gameState, &$visBoxScoreStats, &$homeBoxS
         if($vs->playerid === $playerid) {
             $vs->batter_stat_3b++;
             $vs->batter_stat_ab++;
+            $vs->batter_stat_h++;
         }
     }
 
@@ -1046,6 +1050,7 @@ function getHomeruns($tab, $playerid, &$gameState, &$visBoxScoreStats, &$homeBox
             $vs->batter_stat_r++;
             $vs->batter_stat_ab++;
             $vs->batter_stat_rbi++;
+            $vs->batter_stat_h++;
 
             if($gameState->outs_in_the_inning === 2) {
                 $vs->batter_stat_rbi_2_out++;
