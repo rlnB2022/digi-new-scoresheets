@@ -1052,40 +1052,685 @@
     ?>
 </div>
 <div class="boxscore-stats-totals">
-        <?php
-            $total_ab = 0;
-            $total_r = 0;
-            $total_h = 0;
-            $total_rbi = 0;
-            $total_bb = 0;
-            $total_k = 0;
+    <?php
+        $total_ab = 0;
+        $total_r = 0;
+        $total_h = 0;
+        $total_rbi = 0;
+        $total_bb = 0;
+        $total_k = 0;
+        $total_ibb = 0;
+
+        foreach($visBoxScoreStats as $vs) {
+            if($vs->batter_stat_ab > 0) {
+                $total_ab += $vs->batter_stat_ab;
+            }
+            if($vs->batter_stat_r > 0) {
+                $total_r += $vs->batter_stat_r;
+            }
+            if($vs->batter_stat_h > 0) {
+                $total_h += $vs->batter_stat_h;
+            }
+            if($vs->batter_stat_rbi > 0) {
+                $total_rbi += $vs->batter_stat_rbi;
+            }
+            if($vs->batter_stat_bb > 0) {
+                $total_bb += $vs->batter_stat_bb;
+            }
+            if($vs->batter_stat_k > 0) {
+                $total_k += $vs->batter_stat_k;
+            }
+            if($vs->batter_stat_ibb > 0) {
+                $total_ibb += $vs->batter_stat_ibb;
+            }
+        }
+    ?>
+    <div class="">TOTALS</div>
+    <div class="center-item"><?php echo $total_ab; ?></div>
+    <div class="center-item"><?php echo $total_r; ?></div>
+    <div class="center-item"><?php echo $total_h; ?></div>
+    <div class="center-item"><?php echo $total_rbi; ?></div>
+    <div class="center-item"><?php echo $total_bb; ?></div>
+    <div class="center-item"><?php echo $total_k; ?></div>
+</div>
+<h2>BATTING</h2>
+<div class="extra-base-hits-section">
+    <?php
+        $total_doubles = 0;
+        $total_triples = 0;
+        $total_homeruns = 0;
+        $total_sacflies = 0;
+        $total_sachits = 0;
+        $total_hbp = 0;
+        $team_total_bases = 0;
+        $total_bases = [];
+        $team_total_rbi = 0;
+        $total_rbi = [];
+        $team_total_rbi_2_out = 0;
+        $team_2_out = [];
+
+        foreach($visBoxScoreStats as $vs) {
+            // add up all doubles
+            $total_doubles += $vs->batter_stat_2b;
+        }
+
+        foreach($visBoxScoreStats as $vs) {
+            // add up all triples
+            $total_triples += $vs->batter_stat_3b;
+        }
+
+        foreach($visBoxScoreStats as $vs) {
+            // add up all homeruns
+            $total_homeruns += $vs->batter_stat_hr;
+        }
+
+        foreach($visBoxScoreStats as $vs) {
+            // add up all sac flies
+            $total_sacflies += $vs->batter_stat_sf;
+        }
+
+        foreach($visBoxScoreStats as $vs) {
+            // add up all sac hits
+            $total_sachits += $vs->batter_stat_sh;
+        }
+
+        foreach($visBoxScoreStats as $vs) {
+            // add up all hbp
+            $total_hbp += $vs->batter_stat_hbp;
+        }
+
+        foreach($visBoxScoreStats as $vs) {
+            // total bases
+            $bases = $vs->batter_stat_1b + ($vs->batter_stat_2b * 2) + ($vs->batter_stat_3b * 3) + ($vs->batter_stat_hr * 4);
+            $team_total_bases += $bases;
+
+            $newTotalBases = new TotalBases();
+
+            $newTotalBases->playerid = $vs->playerid;
+            $newTotalBases->bases = $bases;
+
+            array_push($total_bases, $newTotalBases);
+        }
+
+        foreach($visBoxScoreStats as $vs) {
+            // RBI
+            $team_total_rbi += $vs->batter_stat_rbi;
+            $newTotalRBI = new TotalRBI();
+            $newTotalRBI->playerid = $vs->playerid;
+            $newTotalRBI->rbi = $vs->batter_stat_rbi;
+
+            array_push($total_rbi, $newTotalRBI);
+        }
+
+        foreach($visBoxScoreStats as $vs) {
+            // 2-out RBI
+            $team_total_rbi_2_out += $vs->batter_stat_rbi_2_out;
+            $newTotalRBI = new TotalRBI();
+            $newTotalRBI->playerid = $vs->playerid;
+            $newTotalRBI->rbi = $vs->batter_stat_rbi_2_out;
+
+            array_push($team_2_out, $newTotalRBI);
+        }
+
+        // doubles
+        if($total_doubles > 0) {
+            echo '<div class="extra-base-hits-row">2B:</div><div>';
+
+            $found = false;
 
             foreach($visBoxScoreStats as $vs) {
-                if($vs->batter_stat_ab > 0) {
-                    $total_ab += $vs->batter_stat_ab;
-                }
-                if($vs->batter_stat_r > 0) {
-                    $total_r += $vs->batter_stat_r;
-                }
-                if($vs->batter_stat_h > 0) {
-                    $total_h += $vs->batter_stat_h;
-                }
-                if($vs->batter_stat_rbi > 0) {
-                    $total_rbi += $vs->batter_stat_rbi;
-                }
-                if($vs->batter_stat_bb > 0) {
-                    $total_bb += $vs->batter_stat_bb;
-                }
-                if($vs->batter_stat_k > 0) {
-                    $total_k += $vs->batter_stat_k;
+                if($vs->batter_stat_2b > 0) {
+
+                    if($found) {
+                        echo '<br>';
+                    }
+
+                    echo getPlayerName($link, $vs->playerid);
+
+                    if($vs->batter_stat_2b > 1) {
+                        echo ' ' . $vs->batter_stat_2b;
+                    }
+
+                    $found = true;
+
                 }
             }
-        ?>
-        <div class="">TOTALS</div>
-        <div class="center-item"><?php echo $total_ab; ?></div>
-        <div class="center-item"><?php echo $total_r; ?></div>
-        <div class="center-item"><?php echo $total_h; ?></div>
-        <div class="center-item"><?php echo $total_rbi; ?></div>
-        <div class="center-item"><?php echo $total_bb; ?></div>
-        <div class="center-item"><?php echo $total_k; ?></div>
-    </div>
+
+            echo '</div>';
+        }
+        // triples
+        if($total_triples > 0) {
+            echo '<div class="extra-base-hits-row">3B: </div><div class="extra-base-hits-row-name">';
+
+            $found = false;
+
+            foreach($visBoxScoreStats as $vs) {
+                if($vs->batter_stat_3b > 0) {
+
+                    if($found) {
+                        echo '<br>';
+                    }
+
+                    echo getPlayerName($link, $vs->playerid);
+                    
+                    if($vs->batter_stat_3b > 1) {
+                        echo ' ' . $vs->batter_stat_3b;
+                    }
+
+                    $found = true;
+
+                }
+            }
+            
+            echo '</div>';
+        }
+
+        // homeruns
+        if($total_homeruns > 0) {
+            echo '<div class="extra-base-hits-row">HR: </div><div class="extra-base-hits-row-name">';
+
+            $found = false;
+
+            foreach($visBoxScoreStats as $vs) {
+                if($vs->batter_stat_hr > 0) {
+
+                    if($found) {
+                        echo '<br>';
+                    }
+
+                    echo getPlayerName($link, $vs->playerid);
+                    
+                    if($vs->batter_stat_hr > 1) {
+                        echo ' ' . $vs->batter_stat_hr;
+                    }
+
+                    $found = true;
+
+                }
+            }
+            
+            echo '</div>';
+        }
+
+        // intentional walks
+        if($total_ibb > 0) {
+            echo '<div class="extra-base-hits-row">IBB: </div><div class="extra-base-hits-row-name">';
+
+            $found = false;
+
+            foreach($visBoxScoreStats as $vs) {
+                if($vs->batter_stat_ibb > 0) {
+
+                    if($found) {
+                        echo '<br>';
+                    }
+
+                    echo getPlayerName($link, $vs->playerid);
+                    
+                    if($vs->batter_stat_ibb > 1) {
+                        echo ' ' . $vs->batter_stat_ibb;
+                    }
+
+                    $found = true;
+
+                }
+            }
+            
+            echo '</div>';
+        }
+
+        // sac flies
+        if($total_sacflies > 0) {
+            echo '<div class="extra-base-hits-row">SF: </div><div class="extra-base-hits-row-name">';
+
+            $found = false;
+
+            foreach($visBoxScoreStats as $vs) {
+                if($vs->batter_stat_sf > 0) {
+
+                    if($found) {
+                        echo '<br>';
+                    }
+
+                    echo getPlayerName($link, $vs->playerid);
+                    
+                    if($vs->batter_stat_sf > 1) {
+                        echo ' ' . $vs->batter_stat_sf;
+                    }
+
+                    $found = true;
+
+                }
+            }
+            
+            echo '</div>';
+        }
+
+        // sac hits
+        if($total_sachits > 0) {
+            echo '<div class="extra-base-hits-row">SH: </div><div class="extra-base-hits-row-name">';
+
+            $found = false;
+
+            foreach($visBoxScoreStats as $vs) {
+                if($vs->batter_stat_sh > 0) {
+
+                    if($found) {
+                        echo '<br>';
+                    }
+
+                    echo getPlayerName($link, $vs->playerid);
+                    
+                    if($vs->batter_stat_sh > 1) {
+                        echo ' ' . $vs->batter_stat_sh;
+                    }
+
+                    $found = true;
+
+                }
+            }
+            
+            echo '</div>';
+        }
+
+        // hbp
+        if($total_hbp > 0) {
+            echo '<div class="extra-base-hits-row">HBP: </div><div class="extra-base-hits-row-name">';
+
+            $found = false;
+
+            foreach($visBoxScoreStats as $vs) {
+                if($vs->batter_stat_hbp > 0) {
+
+                    if($found) {
+                        echo '<br>';
+                    }
+
+                    echo getPlayerName($link, $vs->playerid);
+                    
+                    if($vs->batter_stat_hbp > 1) {
+                        echo ' ' . $vs->batter_stat_hbp;
+                    }
+
+                    $found = true;
+
+                }
+            }
+            
+            echo '</div>';
+        }
+
+        // total bases
+        if($team_total_bases > 0) {
+            echo '<div class="extra-base-hits-row">TB: </div><div class="extra-base-hits-row-name">';
+
+            usort($total_bases, function($first, $second) {
+                return $first->bases < $second->bases;
+            });
+            foreach($total_bases as $tb) {
+                if($tb->bases > 0) {
+                    if($foundbases) {
+                        echo '<br>';
+                    }
+
+                    echo getPlayerName($link, $tb->playerid);
+
+                    if($tb->bases > 1) {
+                        echo ' ' . $tb->bases;
+                    }
+
+                    $foundbases = true;
+
+                }
+            }
+
+            echo '</div>';
+        }
+
+        // GDP
+        if($gameState->visTeamGDP > 0) {
+            $foundGDP = false;
+
+            echo '<div class="extra-base-hits-row">GIDP: </div><div class="extra-base-hits-row-name">';
+
+            foreach($visBoxScoreStats as $vs) {
+                if($vs->batter_stat_gidp > 0) {
+                    if($foundGIDP) {
+                        echo '<br>';
+                    }
+    
+                    echo getPlayerName($link, $vs->playerid);
+    
+                    if($vs->batter_stat_gidp > 1) {
+                        echo ' ' . $vs->batter_stats_gidp;
+                    }
+    
+                    $foundGIDP = true;
+    
+                }
+            }
+
+            echo '</div>';
+        }
+
+        // GTP
+        if($gameState->visTeamGTP > 0) {
+            $foundGTP = false;
+
+            echo '<div class="extra-base-hits-row">GITP: </div><div class="extra-base-hits-row-name">';
+
+            foreach($visBoxScoreStats as $vs) {
+                if($vs->batter_stat_gitp > 0) {
+                    if($foundGTP) {
+                        echo '<br>';
+                    }
+    
+                    echo getPlayerName($link, $vs->playerid);
+    
+                    if($vs->batter_stat_gidp > 1) {
+                        echo ' ' . $vs->batter_stats_gitp;
+                    }
+    
+                    $foundGTP = true;
+    
+                }
+            }
+
+            echo '</div>';
+        }
+
+        // total rbi
+        if($team_total_rbi > 0) {
+            $foundrbi = false;
+
+            echo '<div class="extra-base-hits-row">RBI: </div><div class="extra-base-hits-row-name">';
+
+            usort($total_rbi, function($first, $second) {
+                return $first->rbi < $second->rbi;
+            });
+
+            foreach($total_rbi as $tr) {
+                if($tr->rbi > 0) {
+                    if($foundrbi) {
+                        echo '<br>';
+                    }
+
+                    echo getPlayerName($link, $tr->playerid);
+
+                    if($tr->rbi > 1) {
+                        echo ' ' . $tr->rbi;
+                    }
+
+                    $foundrbi = true;
+
+                }
+            }
+
+            echo '</div>';
+        }
+
+        // total 2-out rbi
+        if($team_total_rbi_2_out > 0) {
+            echo '<div class="extra-base-hits-row">2-out RBI: </div><div class="extra-base-hits-row-name">';
+
+            usort($team_2_out, function($first, $second) {
+                return $first->rbi < $second->rbi;
+            });
+
+            $foundrbi2 = false;
+
+            foreach($team_2_out as $tr) {
+                if($tr->rbi > 0) {
+                    if($foundrbi2) {
+                        echo '<br>';
+                    }
+
+                    echo getPlayerName($link, $tr->playerid);
+
+                    if($tr->rbi > 1) {
+                        echo ' ' . $tr->rbi;
+                    }
+
+                    $foundrbi2 = true;
+
+                }
+            }
+
+            echo '</div>';
+        }
+    ?>
+</div>
+<div class="extra-batting-stats">
+    <?php
+
+        // Team LOB
+        echo '<div>Team LOB: ' . $gameState->visTeamLOB . '</div>';
+
+        // Runners in scoring position hits per at-bat
+        echo '<br><div>Team LOB: ' . $gameState->risp_vis_h . ' for ' . $gameState->risp_vis_ab . '.' . '</div>';
+    ?>
+</div>
+
+    <?php
+
+        $showFieldingStats = false;
+
+        if($gameState->vis_double-plays_turned > 0) {
+            $showFieldingStats = true;
+        }
+        else if($gameState->vis_errors > 0) {
+            $showFieldingStats = true;
+        }
+        else if($gameState->visPassedBalls > 0) {
+            $showFieldingStats = true;
+        }
+        else if($gameState->visOutfieldAssists > 0) {
+            $showFieldingStats = true;
+        }
+        else if($gameState->vis_triple_plays_turned > 0) {
+            $showFieldingStats = true;
+        }
+
+        if($showFieldingStats) {
+            echo '<h2>Fielding</h2>';
+            echo '<div class="extra-batting-stats">';
+
+            if($gameState->vis_double_plays_turned > 0) {
+                echo '<div>DP:</div><div>' . $gameState->vis_double_plays_turned . '</div>';
+            }
+    
+            // Passed Balls
+            if($gameState->visPassedBalls > 0) {
+                echo '<br>PB: ';
+                foreach($visBoxScoreStats as $vs) {
+                    if($vs->batter_stat_pb > 0) {
+                        echo getPlayerName($link, $vs->playerid);
+                        if($vs->playerid > 1) {
+                            echo ' ' . $vs->batter_stat_pb;
+                        }
+                    }
+                }
+            }
+    
+            // Outfield Assists
+            if($gameState->visOutfieldAssists > 0) {
+                echo '<br>Outfield Assists: ';
+    
+                foreach($visBoxScoreStats as $vs) {
+                    if($vs->fielder_outfield_assists > 0) {
+                        showMessage('found player');
+                        echo getPlayerName($link, $vs->playerid);
+                        if($vs->playerid > 1) {
+                            echo ' ' . $vs->fielder_outfield_assists;
+                        }
+                    }
+                }
+            }
+    
+            // errors
+            if($gameState->visErrors > 0) {
+                echo '<br>E: ';
+                foreach($visBoxScoreStats as $vs) {
+                    if($vs->fielder_stat_error > 0) {
+                        if($founderror) {
+                            echo ', ';
+                        }
+    
+                        echo getPlayerName($link, $vs->playerid);
+                        
+                        if($vs->fielder_stat_error > 1) {
+                            echo ' (' . $vs->fielder_stat_error . ')';
+                        }
+    
+                        $founderror = true;
+    
+                    }
+                }
+    
+                foreach($visPitcherBoxScoreStats as $vs) {
+                    if($vs->fielder_stat_error > 0) {
+                        if($founderror) {
+                            echo ', ';
+                        }
+    
+                        echo getPlayerName($link, $vs->playerid);
+    
+                        if($vs->fielder_stat_error > 1) {
+                            echo ' (' . $vs->fielder_stat_error . ')';
+                        }
+    
+                        $founderror = true;
+    
+                    }
+                }
+            }
+            echo '</div>';
+        }
+
+        // Baserunning
+
+        $showBaseRunning = false;
+
+        // stolen bases
+        if($gameState->visStolenBases > 0) {
+            $showBaseRunner = true;
+        }
+        else if($gameState->visCaughtStealing > 0) {
+            $showBaseRunner = true;
+        }
+        else if($gameState->homeTeamPickoffs > 0) {
+            $showBaseRunner = true;
+        }
+
+        if($showBaseRunner) {
+            echo '<h2>Baserunning</h2>';
+            echo '<div class="extra-base-hits-section">';
+
+                if($gameState->visStolenBases > 0) {
+                    echo '<div>SB:</div><div>';
+
+                    $team_stolen_bases = [];
+
+                    $foundRunner = false;
+        
+                    foreach($visBoxScoreStats as $vs) {
+                        if($vs->batter_stat_sb > 0) {
+                            // store total in array
+                            $sb_array = new TotalBases();
+                            $sb_array->playerid = $vs->playerid;
+                            $sb_array->bases = $vs->batter_stat_sb;
+        
+                            array_push($team_stolen_bases, $sb_array);
+                        }
+                    }
+        
+                    usort($team_stolen_bases, function($first, $second) {
+                        return $first->bases < $second->bases;
+                    });
+        
+                    $foundbases = false;
+                    foreach($team_stolen_bases as $tsb) {
+                        if($tsb->bases > 0) {
+                            if($foundbases) {
+                                echo '<br>';
+                            }
+                            echo getPlayerName($link, $tsb->playerid);
+                            if($tsb->bases > 1) {
+                                echo ' ' . $tsb->bases;
+                            }
+                            $foundbases = true;
+                        }
+                    }
+                    echo '</div>';
+                }
+                if($gameState->visCaughtStealing > 0) {
+                    echo '<div>CS:</div>';
+        
+                    $team_caught_stealing = [];
+        
+                    foreach($visBoxScoreStats as $vs) {
+                        if($vs->batter_stat_cs > 0) {
+                            // store total in array
+                            $cs_array = new TotalBases();
+                            $cs_array->playerid = $vs->playerid;
+                            $cs_array->bases = $vs->batter_stat_cs;
+        
+                            array_push($team_caught_stealing, $cs_array);
+                        }
+                    }
+        
+                    usort($team_caught_stealing, function($first, $second) {
+                        return $first->bases < $second->bases;
+                    });
+        
+                    $foundbases = false;
+                    foreach($team_caught_stealing as $tcs) {
+                        if($tcs->bases > 0) {
+                            if($foundbases) {
+                                echo '<br>';
+                            }
+                            echo getPlayerName($link, $tcs->playerid);
+                            if($tcs->bases > 1) {
+                                echo ' ' . $tcs->bases;
+                            }
+                            $foundbases = true;
+                        }
+                    }  
+                }
+                if($gameState->homeTeamPickoffs > 0) {
+                    echo '<div>Pickoffs:</div>';
+                    $team_pickedoff = [];
+        
+                    foreach($visBoxScoreStats as $vs) {
+                        if($vs->batter_stat_pickedoff > 0) {
+                            $newTotalPickedOff = new TotalPickedOff();
+                            $newTotalPickedOff->playerid = $vs->playerid;
+                            $newTotalPickedOff->num = $vs->batter_stat_pickedoff;
+                
+                            array_push($team_pickedoff, $newTotalPickedOff);
+                        }
+                    }
+        
+                    usort($team_pickedoff, function($first, $second) {
+                        return $first->num < $second->num;
+                    });
+        
+                    $foundPickedOff= false;
+                    foreach($team_pickedoff as $tpo) {
+                        if($tpo->num > 0) {
+                            if($foundPickedOff) {
+                                echo '<br>';
+                            }
+                            echo getPlayerName($link, $tpo->playerid);
+                            if($tpo->num> 1) {
+                                echo ' ' . $tpo->num;
+                            }
+                            $foundPickedOff = true;
+                        }
+                    }  
+                }
+            echo '</div>';
+        }
+
+    ?>
+</div>
