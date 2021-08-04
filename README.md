@@ -14,5 +14,5 @@ This website was created for a specific gaming niche, Tabletop Baseball Gaming. 
 * View, at a glance, the real-life winning and losing pitchers as well as who earned the save. Also displays the runs, hits and errors.
 * View the lineups for each team
 * Print the scoresheet will popup a pdf file for printing.
-  * Lineups and starting pitchers are pre-filled
+* Lineups and starting pitchers are pre-filled
 
