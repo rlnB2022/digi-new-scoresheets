@@ -6,7 +6,7 @@ This website was created for a specific gaming niche, Tabletop Baseball Gaming. 
 
 ![digidugout_screenshot](https://user-images.githubusercontent.com/5834000/128247065-9d57b0c3-664e-4822-b341-6fb680a71375.JPG)
 
-##Features
+## Features
 
 * mySQL database with tables for all players that have ever played the game along with the lineups for each game ever played
 * Custom calendar with month and year selectors.
