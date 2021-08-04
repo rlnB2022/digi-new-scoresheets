@@ -25,3 +25,10 @@ I knew what I wanted to build. I knew who my audience was and why they would wan
 So, I did some research. Mainly into how to access a database from a website that I would create. I stumbled across some YouTube videos on PHP that showed how to connect, read, update, and delete data. It seemed fairly simple so I moved forward.
 
 Next, I looked into web-hosting and found that there were cheap hosting services that used myPhpAdmin, so I went with it. From that point forward, I was learning PHP "on-the-job". I used php.net/docs often, as well as StackOverflow and standard Google searched to find what I was looking for.
+
+## Wireframes and Designs
+
+I went through a number of iterations on the design for the website before settling on the current version. I really just wanted the website to be simple to use and straight to the point. I used simple lined-notebooks and blank sheets of copy paper to draw out ideas.
+
+## Development
+
