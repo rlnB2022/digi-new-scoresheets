@@ -28,7 +28,8 @@ Next, I looked into web-hosting and found that there were cheap hosting services
 
 ## Wireframes and Designs
 
-I went through a number of iterations on the design for the website before settling on the current version. I really just wanted the website to be simple to use and straight to the point. I used simple lined-notebooks and blank sheets of copy paper to draw out ideas.
+I went through a number of iterations on the design for the website before settling on the current version. I really just wanted the website to be simple to use and straight to the point. I used simple lined-notebooks and blank sheets of copy paper to draw out ideas. It wasn't until many months later that I discovered Figma, but never used on this project.
 
 ## Development
 
+To keep track of my progress and what was left to be done, I used a combination of Trello and index cards that I would write on. The index cards turned out to be a not-so-great idea as they would often fall off my desk and into the trash, or get mixed in with other papers, which just drove me crazy. 
