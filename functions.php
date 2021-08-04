@@ -1,5 +1,130 @@
 <?php
 
+function getTeamFontColor($teamName) {
+    switch ($teamName) {
+      case "FLO":
+      case "MIA":
+        return "#000000";
+      case "NYA":
+        return "#ffffff";
+      case "NYN":
+        return "#002D72";
+      case "OAK":
+        return "#EFB21E";
+      case "PIT":
+        return "#000000";
+      case "SFN":
+        return "#27251F";
+      default:
+        return "#FFFFFF";
+    }
+  }
+
+  function getTeamColor($teamName) {
+        switch ($teamName) {
+            case "NLS":
+                return "#005A9C";
+            case "ALS":
+                return "#BA0021";
+            case "ANA":
+            case "LAA":
+            case "CAL":
+                return "#BA0021";
+            case "ARI":
+                return "#A71930";
+            case "ATL":
+                return "#CE1141";
+            case "BAL":
+                return "#DF4601";
+            case "BOS":
+            case "BSN":
+                return "#BD3039";
+            case "CHA":
+                return "#000000";
+            case "CHN":
+                return "#CC3433";
+            case "CIN":
+                return "#C6011F";
+            case "CLE":
+                return "#E31937";
+            case "COL":
+                return "#493F7E";
+            case "DET":
+                return "#0C2C56";
+            case "FLO":
+                return "#FF6600";
+            case "HOU":
+                return "#EB6E1F";
+            case "KCA":
+            case "KC1":
+                return "#004687";
+            case "LAN":
+            case "BRO":
+                return "#005A9C";
+            case "MIA":
+                return "#FF6600";
+            case "MIL":
+            case "MLN":
+                return "#0A2351";
+            case "MIN":
+                return "#002B5C";
+            case "MON":
+            case "NY1":
+                return "#003087";
+            case "NYA":
+                return "#0C2340";
+            case "NYN":
+                return "#FF5910";
+            case "OAK":
+                return "#003831";
+            case "PHI":
+            case "PHA":
+                return "#002D72";
+            case "PIT":
+                return "#FDB827";
+            case "SDN":
+                return "#002D62";
+            case "SEA":
+            case "SE1":
+                return "#005C5C";
+            case "SFN":
+                return "#FD5A1E";
+            case "SLN":
+            case "SLA":
+                return "#C41E3A";
+            case "TBA":
+                return "#092C5C";
+            case "TEX":
+            case "WS1":
+            case "WS2":
+                return "#C0111F";
+            case "TOR":
+                return "#134A8E";
+            case "WAS":
+                return "#AB0003";
+            default:
+                return "Teamname?";
+        }
+  }
+
+function daysInMonth($month) {
+    $days = [0, 0, 0, 31, 30, 31, 30, 31, 31, 30, 31, 30];
+
+    return $days[$month];
+}
+
+function getCurrentMonth($month) {
+    $months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+
+    return $months[$month];
+}
+
+function getCurrentMonthFull($month) {
+    $months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+    return $months[$month];
+}
+
 function getBatterDataLength($outcome) {
     if(strpos($outcome, '.') !== false) {
         return strpos($outcome, '.');
@@ -47,8 +172,8 @@ function getRunnerMovement($outcome) {
     return strpos($outcome, '.') !== false;
 }
 
-function getLineScores($linky, $gamedate, $hometeam, $gamenum, $month, $day, $year) {
-    $sql = "SELECT * FROM GAMELOGS WHERE DATE = '" . $gamedate  . "' AND HOMETEAM = '" . $hometeam . "' AND GAMENUM = '" . $gamenum . "' LIMIT 1";
+function getLineScores($linky, $gamedate, $hometeam, $game, $month, $day, $year) {
+    $sql = "SELECT * FROM GAMELOGS_MAIN WHERE DATE = '" . $gamedate  . "' AND HOMETEAM = '" . $hometeam . "' AND GAME = '" . $game . "' LIMIT 1";
 
     $result = mysqli_query($linky, $sql);
 
@@ -57,7 +182,7 @@ function getLineScores($linky, $gamedate, $hometeam, $gamenum, $month, $day, $ye
     if($resultCheck > 0) {
         $row = mysqli_fetch_assoc($result);
         
-        $boxscorerows = ceil($row['outs'] / 6);
+        $boxscorerows = ceil($row['gamelength'] / 6);
 
         $vislinescore = getLineScore($row['vislinescore']);
         $homelinescore = getLineScore($row['homelinescore']);
@@ -117,7 +242,7 @@ function getLineScores($linky, $gamedate, $hometeam, $gamenum, $month, $day, $ye
             <div class="grid-item"></div>
             <div class="grid-item"><?php echo $row['visscore']; ?></div>
             <div class="grid-item"><?php echo $row['vish']; ?></div>
-            <div class="grid-item"><?php echo $row['viserrors']; ?></div>
+            <div class="grid-item"><?php echo $row['vise']; ?></div>
             <div class="<?php if($vTeamScore > $TeamScore) { echo 'gray-team-color'; } ?>"><?php echo $row['hometeam']; ?></div>
             <?php
                 for($i = 0; $i < $boxscorerows; $i++) { ?>
@@ -128,14 +253,14 @@ function getLineScores($linky, $gamedate, $hometeam, $gamenum, $month, $day, $ye
             <div class="grid-item"></div>
             <div class="grid-item"><?php echo $row['homescore']; ?></div>
             <div class="grid-item"><?php echo $row['homeh']; ?></div>
-            <div class="grid-item"><?php echo $row['homeerrors']; ?></div>
+            <div class="grid-item"><?php echo $row['homee']; ?></div>
         </div>
 
         <div class="team-select">
             <div class="team-select-vis <?php if($vTeamScore < $TeamScore) { echo 'gray-team-color'; } ?>">
                 <?php echo getTeamName($vTeamName); ?>
             </div>
-            <div class="team-select-home <?php if($vTeamScore > $TeamScore) { echo 'gray-team-color'; } ?>">
+            <div class="team-select-home  <?php if($vTeamScore > $TeamScore) { echo 'gray-team-color'; } ?>">
                 <?php echo getTeamName($hTeamName); ?>
             </div>
         </div>
@@ -147,10 +272,9 @@ function getLineScores($linky, $gamedate, $hometeam, $gamenum, $month, $day, $ye
 
 }
 
-function getLineup($linky, $gameid, &$gameState, &$boxScoreStats, $visOrHome) {
+function getLineups($linky, $gamedate, $hometeam, $game, &$gameState, &$visBoxScoreStats, &$homeBoxScoreStats) {
 
-    $lineup = $visOrHome === 'vis' ? 'VISLINEUPS' : 'HOMELINEUPS';
-    $sql = "SELECT * FROM " . $lineup . " WHERE GAMEID = '" . $gameid . "'";
+    $sql = "SELECT * FROM GAMELOGS_MAIN WHERE DATE = '" . $gamedate  . "' AND HOMETEAM = '" . $hometeam . "' AND GAME = '" . $game . "' LIMIT 1";
 
     $result = mysqli_query($linky, $sql);
 
@@ -159,36 +283,48 @@ function getLineup($linky, $gameid, &$gameState, &$boxScoreStats, $visOrHome) {
     if($resultCheck > 0) {
         $row = mysqli_fetch_assoc($result);
 
-        for($i = 0; $i < 9; $i++) {
+        // VISITING TEAM
+        for($i = 1; $i < 10; $i++) {
             // add playerid to boxScoreStats
             $batterS = new playerStat();
-            $batterS->playerid = $row['batter' . ($i + 1)];
-            $batterS->playerpos = $row['pos' . ($i + 1)];
+            $batterS->playerid = $row['visplayerid' . $i];
+            $batterS->playerpos = $row['visplayerposition' . $i];
             $batterS->status = 'starter';
 
             $tempPos = 'pos_' . $batterS->playerpos;
 
             // assign position to visDefense
-            if($visOrHome === 'vis') {
-                $gameState->visDefense->$tempPos = $batterS->playerid;
-                array_push($gameState->visLineup, $batterS->playerid);
-            }
-            else {
-                $gameState->homeDefense->$tempPos = $batterS->playerid;
-                array_push($gameState->homeLineup, $batterS->playerid);
-            }
-
-            array_push($boxScoreStats, $batterS);
+            $gameState->visDefense->$tempPos = $batterS->playerid;
+            array_push($gameState->visLineup, $batterS->playerid);
         }
+
+        array_push($visBoxScoreStats, $batterS);
+
+        // HOME TEAM
+        for($i = 1; $i < 10; $i++) {
+            // add playerid to boxScoreStats
+            $batterS = new playerStat();
+            $batterS->playerid = $row['homeplayerid' . $i];
+            $batterS->playerpos = $row['homeplayerposition' . $i];
+            $batterS->status = 'starter';
+
+            $tempPos = 'pos_' . $batterS->playerpos;
+
+            // assign position to visDefense
+            $gameState->homeDefense->$tempPos = $batterS->playerid;
+            array_push($gameState->homeLineup, $batterS->playerid);
+        }
+
+        array_push($homeBoxScoreStats, $batterS);
     }
 
 }
 
-function getStartingPitchers($linky, $gamedate, $hometeam, $gamenum, &$visPitcherBoxScoreStats, &$homePitcherBoxScoreStats) {
+function getStartingPitchers($linky, $gamedate, $hometeam, $game, &$visPitcherBoxScoreStats, &$homePitcherBoxScoreStats) {
 
     // this function is redundant - should grab data from getlinescore function
     // no sense in another database query
-    $sql = "SELECT * FROM GAMELOGS WHERE DATE = '" . $gamedate  . "' AND HOMETEAM = '" . $hometeam . "' AND GAMENUM = '" . $gamenum . "' LIMIT 1";
+    $sql = "SELECT * FROM GAMELOGS_MAIN WHERE DATE = '" . $gamedate  . "' AND HOMETEAM = '" . $hometeam . "' AND GAME = '" . $game . "' LIMIT 1";
 
     $result = mysqli_query($linky, $sql);
 
@@ -261,6 +397,22 @@ class playerStat {
     }
 }
 
+function correctAbbv($teamname, $year) {
+    if($teamname === 'CAL' || $teamname === 'ANA' || $teamname === 'LAA') {
+        if ($year >= 1961 && $year <= 1965) {
+            return "LAA";
+        }
+        else if($year >= 1966 && $year <= 1996) {
+            return "CAL";
+        }
+        else if($year >= 1997 && $year <= 2004) {
+            return 'ANA';
+        }
+    
+        return "LAA";
+    }
+}
+
 function getDayOfWeek($info) {
     if($info === 'Mon') {
         return 'Monday';
@@ -285,31 +437,48 @@ function getDayOfWeek($info) {
     }
 }
 
-function getTeamName($name) {
+function getTeamName($name, $year) {
     switch ($name) {
         case "NLS":
-        return "NL All-Stars";
+            return "NL All-Stars";
         case "ALS":
-        return "AL All-Stars";
+            return "AL All-Stars";
         case "ANA":
-        if (curYear >= 2005) {
-            return "Los Angeles (A)";
-        } else {
-            return "Anaheim";
-        }
+            if ($year >= 1961 && $year <= 1965) {
+                return "Los Angeles (A)";
+            }
+            else if($year >= 1966 && $year <= 1996) {
+                return "California";
+            }
+            else if($year >= 1997 && $year <= 2004) {
+                return 'Anaheim';
+            }
+
+            return 'Los Angeles (A)';
         case "ARI":
-        return "Arizona";
+            return "Arizona";
         case "ATL":
         return "Atlanta";
         case "BAL":
         return "Baltimore";
         case "BOS":
+            return "Boston";
         case "BSN":
-        return "Boston";
+        return "Boston (N)";
         case "BRO":
         return "Brooklyn";
         case "CAL":
-        return "California";
+            if ($year >= 1961 && $year <= 1964) {
+                return "Los Angeles (A)";
+            }
+            else if($year >= 1965 && $year <= 1996) {
+                return "California";
+            }
+            else if($year >= 1997 && $year <= 2004) {
+                return 'Anaheim';
+            }
+
+            return "Los Angeles (A)";
         case "CHA":
         return "Chicago (A)";
         case "CHN":
@@ -1197,7 +1366,7 @@ function getOut($tab, $batterData, $runnerdata, &$gameState, &$visBoxScoreStats,
 }
 
 function getPositionByNumber($num) {
-    $pos = ['', 'P', 'C', '1B', '2B', '3B', 'SS', 'LF', 'CF', 'RF'];
+    $pos = ['', 'P', 'C', '1B', '2B', '3B', 'SS', 'LF', 'CF', 'RF', 'DH'];
     
     return $pos[$num];
 }
@@ -1640,6 +1809,23 @@ function getPosition($num) {
     $pos = ['P', 'C', '1B', '2B', '3B', 'SS', 'LF', 'CF', 'RF', 'DH', 'PH', 'PR'];
 
     return $pos[$num-1];
+}
+
+function getFullTeamName($linky, $teamAbbv, $year) {
+    $teamname = 'No Teamname found';
+
+    $sql = "SELECT name FROM TEAMS WHERE abbv = '" . $teamAbbv  . "' AND year = " . $year;
+
+    $result = mysqli_query($linky, $sql);
+
+    $resultCheck = mysqli_num_rows($result);
+
+    if($resultCheck > 0) {
+        $row = mysqli_fetch_assoc($result);
+        $teamname = $row['name'];
+    }
+
+    return $teamname;
 }
 
 ?>
