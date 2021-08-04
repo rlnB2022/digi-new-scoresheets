@@ -1,93 +1,32 @@
 <!DOCTYPE html>
-<html class="no-js">
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <title>Test List of Games</title>
-        <meta name="description" content="">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@500&display=swap" rel="stylesheet">
-        <link rel="stylesheet" href="css/style.css">
-    </head>
-    <body>
-        <header>
-            <img src="/images/digidugout-logo.png" alt="logo">
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta http-equiv="ScreenOrientation" content="autoRotate:disabled">
+    <title>DIGITAL DUGOUT</title>
+    <meta name="description" content="DigiDugout provides pre-filled scoresheets with lineups and starting pitchers for any game betwen 1906-current.">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Roboto:wght@500&display=swap" rel="stylesheet">
+  </head>
+  <body>
+    <header>
+      <h1><span class="digital-color">DIGITAL</span>DUGOUT</h1>
+    </header>
 
-            <nav>
-                <ul>
-                    <li>Year
-                        <form method="POST">
-                            <select id="year" name="year"></select>
-                        </form>
-                    </li>
-                </ul>
-            </nav>
-            
-            <div class="hamburger-menu">
+    <section class="about">
+      <h2>TABLETOP BASEBALL GAMING</h2>
+      <p>Every scoresheet from 1906-2020. Pre-filled lineups and starting pitchers so you can start playing without the tedious setup.</p>
+      <!-- <p>EVERY SCORESHEET FROM 1906-2020. PRE-FILLED LINEUPS AND STARTING PITCHERS SO YOU CAN START PLAYING WITHOUT THE TEDIOUS SETUP.</p> -->
+      <a href="games.php">SCORESHEETS</a></div>
+    </section>
 
-            </div>
-        </header>
+    <footer class="copyright">
+      Copyright &copy;<span class="todays-year"></span>. All rights reserved.
+    </footer>
 
-        <input type="date">
-
-        <section class="grid-of-games">
-            <div class="game-container">
-                <div class="game">
-                    <div class="cell top-row-empty"></div>
-                    <div class="cell top-row-header">R</div>
-                    <div class="cell top-row-header">H</div>
-                    <div class="cell top-row-header">E</div>
-                    <div class="btm-space vis-teamname">
-                        Texas
-                    </div>
-                    <div class="cell btm-space vis-runs-scored">
-                        9
-                    </div>
-                    <div class="cell btm-space vis-hits">
-                        9
-                    </div>
-                    <div class="cell btm-space vis-errors">
-                        2
-                    </div>
-                    <div class="home-teamname">
-                        Pittsburgh
-                    </div>
-                    <div class="cell home-runs-scored">
-                        6
-                    </div>
-                    <div class="cell home-hits">
-                        10
-                    </div>
-                    <div class="cell home-errors">
-                        0
-                    </div>
-                </div>
-                <div class="separator"></div>
-                <div class="pitchers-of-record">
-                    <p class="pitcher-right-align">Winning Pitcher:</p>
-                    <p>Winning Pitcher</p>
-                    <p class="pitcher-right-align">Losing Pitcher:</p>
-                    <p>Losing Pitcher</p>
-                    <p class="pitcher-right-align">Save:</p>
-                    <p>Saving Pitcher</p>
-                </div>
-                <div class="separator"></div>
-                <div class="button-options">
-                    <div class="btn-scoresheet button-choice">
-                        <img src="./images/recap.png" alt="Watch game unfold">
-                        <p>Scoresheet</p>
-                    </div>
-                    <div class="btn-box-score button-choice">
-                        <img src="./images/recap.png" alt="Watch game unfold">
-                        <p>Box Score</p>
-                    </div>
-                    <div class="btn-recap button-choice">
-                        <img src="./images/recap.png" alt="Watch game unfold">
-                        <p>Recap</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-        <script src="js/script.js" async defer></script>
-    </body>
+    <script src="js/index.js" async defer></script>
+  </body>
 </html>
