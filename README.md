@@ -18,23 +18,23 @@ This website was created for a specific gaming niche, Tabletop Baseball Gaming. 
 
 ## Development Process
 
-My goal was simple. Create a website where users don't have to do any online research; they don't have to write the lineups and starting pitchers on a blank scorehseet by hand; they can just literally find the game and click print.
+My goal was simple. Create a website where users don't have to do any online research; they don't have to write the lineups and starting pitchers on a blank score sheet by hand; they can just find the game and click print score sheet.
 
 I knew what I wanted to build. I knew who my audience was and why they would want to use this resource. I just didn't know what Tech to use to accomplish my goals.
 
 So, I did some research. Mainly into how to access a database from a website that I would create. I stumbled across some YouTube videos on PHP that showed how to connect, read, update, and delete data. It seemed fairly simple so I moved forward.
 
-Next, I looked into web-hosting and found that there were cheap hosting services that used myPhpAdmin, so I went with it. From that point forward, I was learning PHP "on-the-job". I used php.net/docs often, as well as StackOverflow and standard Google searched to find what I was looking for.
+Next, I looked into web-hosting and found that there were cheap hosting services that used phpMyAdmin, so I went with it. From that point forward, I was learning PHP "on-the-job". I used php.net/docs often, as well as StackOverflow and standard Google searches to find what I was looking for.
 
 ## Wireframes and Designs
 
-I went through a number of iterations on the design for the website before settling on the current version. I really just wanted the website to be simple to use and straight to the point. I used simple lined-notebooks and blank sheets of copy paper to draw out ideas. It wasn't until many months later that I discovered Figma, but never used on this project.
+I went through a number of iterations on the design for the website before settling on the current version. I really just wanted the website to be simple to use and straight to the point. I used lined-notebooks and blank sheets of copy paper to draw out ideas. It wasn't until many months later that I discovered Figma, but never used it with this project.
 
 ## Development
 
-To keep track of my progress and what was left to be done, I used a combination of Trello and index cards that I would write on. The index cards turned out to be a not-so-great idea as they would often fall off my desk and into the trash, or get mixed in with other papers, which just drove me crazy. 
+To keep track of my progress and what was left to be done, I used a combination of Trello and index cards that I would write on. The index cards turned out to be a not-so-great idea as they would often fall off my desk and into the trash, or get mixed in with other papers, which just drove me crazy! Lesson learned.
 
-Throughout the development process, I continued to learn not only about PHP, but jQuery and AJAX. I learned that they go hand-in-hand and that allowed me to fetch data without reloading the page. I thought that was so cool!
+Throughout the development process, I continued to learn not only about PHP, but jQuery and AJAX. I learned that they go hand-in-hand and this allowed me to fetch data without reloading the page. I thought that was so cool!
 
 ## Post Launch Support
 
