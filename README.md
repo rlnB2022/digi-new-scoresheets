@@ -16,3 +16,12 @@ This website was created for a specific gaming niche, Tabletop Baseball Gaming. 
 * Print the scoresheet will popup a pdf file for printing.
 * Lineups and starting pitchers are pre-filled
 
+## Development Process
+
+My goal was simple. Create a website where users don't have to do any online research; they don't have to write the lineups and starting pitchers on a blank scorehseet by hand; they can just literally find the game and click print.
+
+I knew what I wanted to build. I knew who my audience was and why they would want to use this resource. I just didn't know what Tech to use to accomplish my goals.
+
+So, I did some research. Mainly into how to access a database from a website that I would create. I stumbled across some YouTube videos on PHP that showed how to connect, read, update, and delete data. It seemed fairly simple so I moved forward.
+
+Next, I looked into web-hosting and found that there were cheap hosting services that used myPhpAdmin, so I went with it. From that point forward, I was learning PHP "on-the-job". I used php.net/docs often, as well as StackOverflow and standard Google searched to find what I was looking for.
