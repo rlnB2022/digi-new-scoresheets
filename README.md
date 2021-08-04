@@ -36,3 +36,14 @@ To keep track of my progress and what was left to be done, I used a combination 
 
 Throughout the development process, I continued to learn not only about PHP, but jQuery and AJAX. I learned that they go hand-in-hand and that allowed me to fetch data without reloading the page. I thought that was so cool!
 
+## Post Launch Support
+
+I have received a handful of requests to fix bugs and introduce changes based on customer feedback.
+
+## What I Have Learned
+
+In the beginning, I struggled to get things to work as intended as I was completely new to PHP, AJAX and jQuery. It took a monumental effort to learn these technologies during the development process.
+
+I learned a lot with this project. New tech, new methods of fetching data, and I even learned that if you don't like the way built-in Date Objects work, I can make my own.
+
+I'm certain the code can be improved upon, but I'm super proud of the work I did on this!
