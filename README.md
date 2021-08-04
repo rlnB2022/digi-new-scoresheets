@@ -47,3 +47,5 @@ In the beginning, I struggled to get things to work as intended as I was complet
 I learned a lot with this project. New tech, new methods of fetching data, and I even learned that if you don't like the way built-in Date Objects work, I can make my own.
 
 I'm certain the code can be improved upon, but I'm super proud of the work I did on this!
+
+Thanks for reading!
