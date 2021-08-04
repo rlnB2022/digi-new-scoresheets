@@ -33,3 +33,6 @@ I went through a number of iterations on the design for the website before settl
 ## Development
 
 To keep track of my progress and what was left to be done, I used a combination of Trello and index cards that I would write on. The index cards turned out to be a not-so-great idea as they would often fall off my desk and into the trash, or get mixed in with other papers, which just drove me crazy. 
+
+Throughout the development process, I continued to learn not only about PHP, but jQuery and AJAX. I learned that they go hand-in-hand and that allowed me to fetch data without reloading the page. I thought that was so cool!
+
