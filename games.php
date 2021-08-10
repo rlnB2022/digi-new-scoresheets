@@ -15,17 +15,30 @@
         <link href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Roboto:wght@900&display=swap" rel="stylesheet">
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
         <script>
-
             $(document).ready(function() {
                 let selectedDate = '';
                 let month = 0;
 
+                // $(document).on('click', function(e) {
+                //     console.log(e.target);
+                // });
+
                 $('.month-container').on('click', function() {
-                    $('.month-dropdown-content').toggleClass('show-dropdown-content');
+                    if($('.month-dropdown-content').hasClass('show-dropdown-content')) {
+                        $('.month-dropdown-content').removeClass('show-dropdown-content');
+                    }
+                    else {
+                        $('.month-dropdown-content').addClass('show-dropdown-content');
+                    }
                 });
 
                 $('.year-container').on('click', function() {
-                    $('.year-dropdown-content').toggleClass('show-dropdown-content');
+                    if($('.year-dropdown-content').hasClass('show-dropdown-content')) {
+                        $('.year-dropdown-content').removeClass('show-dropdown-content');
+                    }
+                    else {
+                        $('.year-dropdown-content').addClass('show-dropdown-content');
+                    }
                 });
 
                 $('.btn-scoresheet').on('click', function(e) {
@@ -35,7 +48,6 @@
                     thisGameNum = $(e.target).data("gamenum");
 
                     $('#gridgames').css('filter', 'blur(4px)');
-
                     // show lineups
                     $("#mylineups").load("load-lineups.php", {
                         gameid: thisGameId,
@@ -85,7 +97,6 @@
                         // remove active class
                         const elems = document.querySelectorAll('.year-dropdown-content a');
 
-                        // remove all active-year classes
                         elems.forEach(name => {
                             if(name.classList.contains('active-year')) {
                                 name.classList.remove('active-year');
@@ -138,13 +149,39 @@
                 $("#mydate").on('change', function() {
                     // setup new date
                     selectedDate = $("#mydate").val();
+                    // selectedDate = selectedDate.replace(/-/g, "");
 
                     $("#gridgames").load("load-games.php", {
                         newDate: selectedDate
                     },function() {
                         $(window).scrollTop(0);
+                    //     $('.button-choice').on('click', function(event) {
+                    //         let thisGameId = event.target.dataset.boxscore;
+
+                    //         // show boxscore in a pop-up window
+                    //         $("#myboxscore").load("load-boxscore.php", {
+                    //             gameid: thisGameId
+                    //         },function() {
+                    //     // add visible class to .boxscore
+                    //     $(".boxscore").css('display','block');
+                    // });
+                    //     });
                     });
                 });
+                // $('.button-choice').on('click', function(event) {
+                //     let thisGameId = event.target.dataset.boxscore;
+
+                //     // show boxscore in a pop-up window
+                //     $("#myboxscore").load("load-boxscore.php", {
+                //         gameid: thisGameId
+                //     },function() {
+                //         // add visible class to .boxscore
+                //         $(".boxscore").css('display','block');
+                //     });
+                // });
+                // $('.team-select-vis').on('click', function(event) {
+                //     $('home-boxscore').addClass('hide-boxscore');
+                // });
             });
         </script>
         <link rel="stylesheet" href="css/style-test.css">
@@ -253,6 +290,7 @@
                                     <?php
                                     
                             }
+                            // increment curMonth
                             $curMonth++;
                             ?>
                             </div>
@@ -1749,6 +1787,14 @@
                                     <div class="btn-scoresheet button-choice" data-team="<?php echo $row['hometeam']; ?>" data-gamenum="<?php echo $row['game']; ?>">
                                         VIEW LINEUPS
                                     </div>
+                                    <!-- <div data-boxscore="<?php /* echo $row['hometeam'] . $year . $month . $day . $row['game']; */ ?>" class="btn-box-score button-choice btn-disabled">
+                                        <i class="fas fa-list-ol fa-2x"></i>
+                                        <p>Box Score</p>
+                                    </div>
+                                    <div class="btn-recap button-choice btn-disabled">
+                                        <img src="./images/recap.png" alt="Watch game unfold">
+                                        <p>Recap</p>
+                                    </div> -->
                                 </div>
                             </div>
                     <?php }
