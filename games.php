@@ -15,26 +15,17 @@
         <link href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Roboto:wght@900&display=swap" rel="stylesheet">
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
         <script>
+
             $(document).ready(function() {
                 let selectedDate = '';
                 let month = 0;
 
                 $('.month-container').on('click', function() {
-                    if($('.month-dropdown-content').hasClass('show-dropdown-content')) {
-                        $('.month-dropdown-content').removeClass('show-dropdown-content');
-                    }
-                    else {
-                        $('.month-dropdown-content').addClass('show-dropdown-content');
-                    }
+                    $('.month-dropdown-content').toggleClass('show-dropdown-content');
                 });
 
                 $('.year-container').on('click', function() {
-                    if($('.year-dropdown-content').hasClass('show-dropdown-content')) {
-                        $('.year-dropdown-content').removeClass('show-dropdown-content');
-                    }
-                    else {
-                        $('.year-dropdown-content').addClass('show-dropdown-content');
-                    }
+                    $('.year-dropdown-content').toggleClass('show-dropdown-content');
                 });
 
                 $('.btn-scoresheet').on('click', function(e) {
@@ -44,6 +35,7 @@
                     thisGameNum = $(e.target).data("gamenum");
 
                     $('#gridgames').css('filter', 'blur(4px)');
+
                     // show lineups
                     $("#mylineups").load("load-lineups.php", {
                         gameid: thisGameId,
@@ -93,6 +85,7 @@
                         // remove active class
                         const elems = document.querySelectorAll('.year-dropdown-content a');
 
+                        // remove all active-year classes
                         elems.forEach(name => {
                             if(name.classList.contains('active-year')) {
                                 name.classList.remove('active-year');
