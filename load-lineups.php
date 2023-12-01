@@ -1,5 +1,5 @@
 <?php
-    include "configtest.php";
+    include("$_SERVER[DOCUMENT_ROOT]/../configtest.php");
     include "functions.php";
 
     $date = $_POST['gameid'];
@@ -33,8 +33,15 @@
             });
 
             $('.lineup-print-button').on('click', function() {
-                window.print();
+                $("#mylineups").css("display", "none");
+                setTimeout(() => {
+                    window.print();
+                }, 100);
             })
+
+            window.onafterprint = function() {
+                $("#mylineups").css("display", "grid");
+            }
 
             $('.lineup-home-team-button').on('click', function(e) {
                 // show home team lineup
@@ -64,50 +71,50 @@
                 $('#home-starting-pitcher-header').addClass("hide-element");
                 $('#home-starting-pitcher').addClass("hide-element");
             });
-            $('.btn-scoresheet').on('click', function(e) {
-                    thisGameId = $("#mydate").val();
-                    thisTeam = $(e.target).data("team");
-                    thisGameNum = $(e.target).data("gamenum");
-                    $('#gridgames').css('filter', 'blur(4px)');
-                    // show lineups
-                    $("#mylineups").load("load-lineups.php", {
-                        gameid: thisGameId,
-                        team: thisTeam,
-                        gamenum: thisGameNum
-                    }, function() {
-                        $('.date-selector').css('display', 'none');
-                        document.documentElement.style.overflow = "hidden";
-                        $(window).scrollTop(0);
-                        $("#mylineups").css('display', 'grid');
+            // $('.btn-scoresheet').on('click', function(e) {
+            //         thisGameId = $("#mydate").val();
+            //         thisTeam = $(e.target).data("team");
+            //         thisGameNum = $(e.target).data("gamenum");
+            //         $('#gridgames').css('filter', 'blur(4px)');
+            //         // show lineups
+            //         $("#mylineups").load("load-lineups.php", {
+            //             gameid: thisGameId,
+            //             team: thisTeam,
+            //             gamenum: thisGameNum
+            //         }, function() {
+            //             $('.date-selector').css('display', 'none');
+            //             document.documentElement.style.overflow = "hidden";
+            //             $(window).scrollTop(0);
+            //             $("#mylineups").css('display', 'grid');
 
-                        // populate scoresheet
-                        $('#footer-date').text($('.current-date').text());
+            //             // populate scoresheet
+            //             $('#footer-date').text($('.current-date').text());
 
-                        // get teams and replace headers
-                        $('#vis-team-name').text($('.lineup-visitor-team-button').text());
-                        $('#home-team-name').text($('.lineup-home-team-button').text());
+            //             // get teams and replace headers
+            //             $('#vis-team-name').text($('.lineup-visitor-team-button').text());
+            //             $('#home-team-name').text($('.lineup-home-team-button').text());
 
-                        const visLineupNames = document.querySelectorAll('.lineup-visitors .lineup-name');
-                        const homeLineupNames = document.querySelectorAll('.lineup-home .lineup-name');
+            //             const visLineupNames = document.querySelectorAll('.lineup-visitors .lineup-name');
+            //             const homeLineupNames = document.querySelectorAll('.lineup-home .lineup-name');
 
-                        const visPos = document.querySelectorAll('.lineup-visitors .lineup-pos');
-                        const homePos = document.querySelectorAll('.lineup-home .lineup-pos');
+            //             const visPos = document.querySelectorAll('.lineup-visitors .lineup-pos');
+            //             const homePos = document.querySelectorAll('.lineup-home .lineup-pos');
                         
-                        for(let i = 0; i < 9; i++) {
-                            $('#vBatter' + (i+1) + 'Name').text(visLineupNames[i].textContent);
-                            $('#hBatter' + (i+1) + 'Name').text(homeLineupNames[i].textContent);
+            //             for(let i = 0; i < 9; i++) {
+            //                 $('#vBatter' + (i+1) + 'Name').text(visLineupNames[i].textContent);
+            //                 $('#hBatter' + (i+1) + 'Name').text(homeLineupNames[i].textContent);
 
-                            $('#vPos' + (i+1)).text(visPos[i].textContent);
-                            $('#hPos' + (i+1)).text(homePos[i].textContent);
-                        }
+            //                 $('#vPos' + (i+1)).text(visPos[i].textContent);
+            //                 $('#hPos' + (i+1)).text(homePos[i].textContent);
+            //             }
 
-                        $('#vPitcherName').text($('#visitors-starting-pitcher').text());
-                        $('#hPitcherName').text($('#home-starting-pitcher').text());
+            //             $('#vPitcherName').text($('#visitors-starting-pitcher').text());
+            //             $('#hPitcherName').text($('#home-starting-pitcher').text());
 
-                        $('.scoreboard-team1').text($('.lineup-visitor-team-button').text());
-                        $('.scoreboard-team2').text($('.lineup-home-team-button').text());
-                    });
-                });
+            //             $('.scoreboard-team1').text($('.lineup-visitor-team-button').text());
+            //             $('.scoreboard-team2').text($('.lineup-home-team-button').text());
+            //         });
+            //     });
         </script>
             <div class="lineup-date"><?php echo getCurrentMonthFull($month) . " " . $day . ", " . $year; ?></div>
             <div class="lineup-team-buttons">
